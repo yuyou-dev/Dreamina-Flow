@@ -210,21 +210,6 @@ export function resolveNodeParamRules(definition: NodeDefinition, rawParams: Rec
           : `supported resolutions are ${supportedResolutions.join("/")}`,
       );
     }
-    if (
-      (params.resolution_type === undefined || params.resolution_type === null || params.resolution_type === "")
-      && supportedResolutions.length > 0
-    ) {
-      setCorrection(
-        params,
-        corrections,
-        "resolution_type",
-        firstAllowedChoice(definition, "resolution_type", supportedResolutions),
-        modelVersion
-          ? `model ${modelVersion} requires a supported resolution`
-          : `supported resolutions are ${supportedResolutions.join("/")}`,
-      );
-    }
-
     warning = modelVersion
       ? `Model ${modelVersion} supports ${supportedResolutions.join(" / ")} resolutions.`
       : definition.warnings[0];
@@ -292,19 +277,6 @@ export function resolveNodeParamRules(definition: NodeDefinition, rawParams: Rec
       `model ${effectiveModel} supports ${allowedVideoResolutions.join("/")}`,
     );
   }
-  if (
-    (params.video_resolution === undefined || params.video_resolution === null || params.video_resolution === "")
-    && allowedVideoResolutions.length > 0
-  ) {
-    setCorrection(
-      params,
-      corrections,
-      "video_resolution",
-      firstAllowedChoice(definition, "video_resolution", allowedVideoResolutions),
-      `model ${effectiveModel} requires a supported resolution`,
-    );
-  }
-
   if (appliedRule.duration) {
     const [min, max] = appliedRule.duration;
     paramStates.duration = {

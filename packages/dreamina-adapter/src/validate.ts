@@ -1,6 +1,16 @@
 import type { NodeDefinition, ResolvedInputValue, ValidationResult } from "@workflow-studio/workflow-core";
 import { isProcessorNode } from "./catalog.js";
 
+function readAliases(node: NodeDefinition): Record<string, string> {
+  const aliases = node.constraints.aliases;
+  if (!aliases || typeof aliases !== "object" || Array.isArray(aliases)) {
+    return {};
+  }
+  return Object.fromEntries(
+    Object.entries(aliases).filter((entry): entry is [string, string] => typeof entry[1] === "string"),
+  );
+}
+
 function firstText(values: ResolvedInputValue[] | undefined): string | null {
   if (!values || values.length === 0) {
     return null;
@@ -174,6 +184,7 @@ export function validateNodeRun(
   const errors: string[] = [];
   const warnings = [...node.warnings];
   const normalizedParams: Record<string, unknown> = {};
+  const aliases = readAliases(node);
 
   if (!isProcessorNode(node.name)) {
     return {
@@ -236,10 +247,28 @@ export function validateNodeRun(
         errors.push(`${parameter.label} must be a number.`);
         return;
       }
+      if (parameter.min !== undefined && parsed < parameter.min) {
+        errors.push(`${parameter.label} must be >= ${parameter.min}.`);
+        return;
+      }
+      if (parameter.max !== undefined && parsed > parameter.max) {
+        errors.push(`${parameter.label} must be <= ${parameter.max}.`);
+        return;
+      }
       normalizedParams[parameter.key] = parsed;
       return;
     }
-    normalizedParams[parameter.key] = value;
+    const normalizedValue = typeof value === "string" ? aliases[value] ?? value : value;
+    if (
+      parameter.type === "select"
+      && parameter.choices?.length
+      && typeof normalizedValue === "string"
+      && !parameter.choices.includes(normalizedValue)
+    ) {
+      errors.push(`${parameter.label} must be one of: ${parameter.choices.join(", ")}.`);
+      return;
+    }
+    normalizedParams[parameter.key] = normalizedValue;
   });
 
   switch (node.name) {

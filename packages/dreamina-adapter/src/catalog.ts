@@ -36,7 +36,7 @@ const processorTemplates: Record<string, ProcessorNodeTemplate> = {
     title: "Text to Image",
     inputs: [{ id: "prompt", label: "Prompt", type: "text", required: true }],
     outputs: [{ id: "image", label: "Image", type: "image" }],
-    defaults: { ratio: "16:9", resolution_type: "2k", model_version: "3.1", poll: getDefaultPollSeconds("text2image") },
+    defaults: { ratio: "16:9", poll: getDefaultPollSeconds("text2image") },
     warnings: ["1k only works with model 3.0 or 3.1.", "4k is limited to 4.x or 5.0."],
     constraints: {
       supportedRatios: ratioChoices,
@@ -54,7 +54,7 @@ const processorTemplates: Record<string, ProcessorNodeTemplate> = {
       { id: "prompt", label: "Prompt", type: "text", required: false },
     ],
     outputs: [{ id: "image", label: "Image", type: "image" }],
-    defaults: { ratio: "16:9", resolution_type: "2k", model_version: "4.0", poll: getDefaultPollSeconds("image2image") },
+    defaults: { ratio: "16:9", poll: getDefaultPollSeconds("image2image") },
     warnings: [],
     constraints: { supportedRatios: ratioChoices, imageRange: [1, 10] },
   },
@@ -62,7 +62,7 @@ const processorTemplates: Record<string, ProcessorNodeTemplate> = {
     title: "Image Upscale",
     inputs: [{ id: "image", label: "Image", type: "image", required: true }],
     outputs: [{ id: "image", label: "Image", type: "image" }],
-    defaults: { resolution_type: "4k", poll: getDefaultPollSeconds("image_upscale") },
+    defaults: { poll: getDefaultPollSeconds("image_upscale") },
     warnings: ["4k and 8k upscale require VIP."],
     constraints: {},
   },
@@ -70,7 +70,7 @@ const processorTemplates: Record<string, ProcessorNodeTemplate> = {
     title: "Text to Video",
     inputs: [{ id: "prompt", label: "Prompt", type: "text", required: true }],
     outputs: [{ id: "video", label: "Video", type: "video" }],
-    defaults: { duration: 5, ratio: "16:9", video_resolution: "720p", model_version: "seedance2.0fast", poll: getDefaultPollSeconds("text2video") },
+    defaults: { duration: 5, model_version: "seedance2.0fast", poll: getDefaultPollSeconds("text2video") },
     warnings: ["Some Seedance models may require one-time web authorization before use."],
     constraints: { supportedRatios: videoRatioChoices },
   },
@@ -81,8 +81,11 @@ const processorTemplates: Record<string, ProcessorNodeTemplate> = {
       { id: "prompt", label: "Prompt", type: "text", required: true },
     ],
     outputs: [{ id: "video", label: "Video", type: "video" }],
-    defaults: { duration: 5, video_resolution: "1080p", model_version: "3.0", poll: getDefaultPollSeconds("image2video") },
-    warnings: ["Advanced duration and resolution controls require model_version.", "Ratio is inferred from the input image."],
+    defaults: { poll: getDefaultPollSeconds("image2video") },
+    warnings: [
+      "Leave model_version empty to use the basic image-to-video path; set it to unlock advanced controls.",
+      "Ratio is inferred from the input image.",
+    ],
     constraints: {
       modelRules: {
         "3.0": { duration: [3, 10], video_resolution: ["720p", "1080p"] },
@@ -111,7 +114,7 @@ const processorTemplates: Record<string, ProcessorNodeTemplate> = {
       { id: "prompt", label: "Prompt", type: "text", required: true },
     ],
     outputs: [{ id: "video", label: "Video", type: "video" }],
-    defaults: { duration: 5, video_resolution: "720p", model_version: "seedance2.0fast", poll: getDefaultPollSeconds("frames2video") },
+    defaults: { duration: 5, model_version: "seedance2.0fast", poll: getDefaultPollSeconds("frames2video") },
     warnings: ["Ratio is inferred from the first frame image."],
     constraints: {
       modelRules: {
@@ -153,7 +156,7 @@ const processorTemplates: Record<string, ProcessorNodeTemplate> = {
       { id: "prompt", label: "Prompt", type: "text", required: false },
     ],
     outputs: [{ id: "video", label: "Video", type: "video" }],
-    defaults: { duration: 5, ratio: "16:9", video_resolution: "720p", model_version: "seedance2.0fast", poll: getDefaultPollSeconds("multimodal2video") },
+    defaults: { duration: 5, poll: getDefaultPollSeconds("multimodal2video") },
     warnings: [
       "At least one image or video is required.",
       "Audio references must be between 2 and 15 seconds in Dreamina.",
@@ -181,6 +184,7 @@ const parameterLabels: Record<string, string> = {
   transition_duration: "Transition Duration",
   audio: "Audio",
   video: "Video",
+  session: "Session",
   submit_id: "Submit ID",
   download_dir: "Download Dir",
   gen_status: "Generation Status"

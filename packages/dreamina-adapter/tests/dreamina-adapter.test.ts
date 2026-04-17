@@ -15,6 +15,7 @@ const wrapperCommands = [
       { key: "ratio", multiple: false, required: false, value_type: "string", choices: ["1:1", "16:9"], min_value: null, max_value: null, path_mode: null },
       { key: "resolution_type", multiple: false, required: false, value_type: "string", choices: ["1k", "2k"], min_value: null, max_value: null, path_mode: null },
       { key: "model_version", multiple: false, required: false, value_type: "string", choices: ["3.0", "3.1"], min_value: null, max_value: null, path_mode: null },
+      { key: "session", multiple: false, required: false, value_type: "int", choices: [], min_value: 0, max_value: null, path_mode: null },
       { key: "poll", multiple: false, required: false, value_type: "int", choices: [], min_value: 1, max_value: 1800, path_mode: null },
     ],
   },
@@ -28,6 +29,11 @@ describe("dreamina-adapter", () => {
     expect(catalog.canvasNodes.processor).toHaveLength(1);
     expect(catalog.canvasNodes.processor[0]?.category).toBe("processor");
     expect(catalog.nodes.some((node) => node.name === "input_text")).toBe(true);
+    expect(catalog.canvasNodes.processor[0]?.params.find((param) => param.key === "session")).toMatchObject({
+      label: "Session",
+      type: "number",
+      min: 0,
+    });
   });
 
   it("validates normalized processor inputs", () => {
@@ -50,6 +56,72 @@ describe("dreamina-adapter", () => {
 
     expect(result.ok).toBe(true);
     expect(result.normalizedParams.prompt).toContain("silver ring");
+  });
+
+  it("validates generic numeric parameter ranges for wrapper-defined params", () => {
+    const processor = buildProcessorDefinitions(wrapperCommands, { text2image: "help" })[0];
+    expect(processor).toBeDefined();
+    if (!processor) {
+      return;
+    }
+
+    const result = validateNodeRun(
+      processor,
+      {
+        session: -1,
+      },
+      {
+        prompt: [{ kind: "text", text: "A studio photograph of a silver ring." }],
+      },
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContain("Session must be >= 0.");
+  });
+
+  it("accepts aliased image2video model values and normalizes them before select validation", () => {
+    const image2videoProcessor = {
+      name: "image2video",
+      title: "Image to Video",
+      category: "processor" as const,
+      description: "Processor node.",
+      inputs: [
+        { id: "image", label: "First Frame", type: "image" as const, required: true },
+        { id: "prompt", label: "Prompt", type: "text" as const, required: true },
+      ],
+      outputs: [{ id: "video", label: "Video", type: "video" as const }],
+      params: [
+        { key: "duration", label: "Duration (s)", type: "number" as const },
+        { key: "video_resolution", label: "Resolution", type: "select" as const, choices: ["720p", "1080p"] },
+        { key: "model_version", label: "Model", type: "select" as const, choices: ["3.0", "3.0fast", "3.0pro", "3.5pro"] },
+      ],
+      defaults: {},
+      outputMode: "json",
+      wrapperAvailable: true,
+      rawCliAvailable: true,
+      constraints: {
+        aliases: {
+          "3.0_fast": "3.0fast",
+          "3.0_pro": "3.0pro",
+          "3.5_pro": "3.5pro",
+        },
+      },
+      warnings: [],
+    };
+
+    const result = validateNodeRun(
+      image2videoProcessor,
+      {
+        model_version: "3.0_fast",
+      },
+      {
+        image: [{ kind: "image", localPath: "/tmp/first.png" }],
+        prompt: [{ kind: "text", text: "Add a gentle push-in." }],
+      },
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.normalizedParams.model_version).toBe("3.0fast");
   });
 
   it("normalizes terminal output for QR-style login sessions", () => {

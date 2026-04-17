@@ -71,6 +71,15 @@ class CommandSpec:
     validator: Callable[[argparse.Namespace], None] | None = None
 
 
+SESSION_PARAMETER = ParameterSpec(
+    "session",
+    "session",
+    "Optional Dreamina session id. Omit to use the CLI default session.",
+    value_type="int",
+    min_value=0,
+)
+
+
 class DreaminaWrapperError(Exception):
     def __init__(
         self,
@@ -494,6 +503,7 @@ COMMAND_SPECS: dict[str, CommandSpec] = {
                 "Model version.",
                 choices=("3.0", "3.1", "4.0", "4.1", "4.5", "4.6", "5.0"),
             ),
+            SESSION_PARAMETER,
             ParameterSpec("poll", "poll", "Optional polling window in seconds.", value_type="int", min_value=0),
         ),
         examples=(
@@ -526,6 +536,7 @@ COMMAND_SPECS: dict[str, CommandSpec] = {
                 "Model version.",
                 choices=("4.0", "4.1", "4.5", "4.6", "5.0"),
             ),
+            SESSION_PARAMETER,
             ParameterSpec("poll", "poll", "Optional polling window in seconds.", value_type="int", min_value=0),
         ),
         examples=(
@@ -544,6 +555,7 @@ COMMAND_SPECS: dict[str, CommandSpec] = {
                 "Target resolution.",
                 choices=("2k", "4k", "8k"),
             ),
+            SESSION_PARAMETER,
             ParameterSpec("poll", "poll", "Optional polling window in seconds.", value_type="int", min_value=0),
         ),
         examples=(
@@ -575,6 +587,7 @@ COMMAND_SPECS: dict[str, CommandSpec] = {
                 "Model version.",
                 choices=("seedance2.0", "seedance2.0fast", "seedance2.0_vip", "seedance2.0fast_vip"),
             ),
+            SESSION_PARAMETER,
             ParameterSpec("poll", "poll", "Optional polling window in seconds.", value_type="int", min_value=0),
         ),
         examples=(
@@ -592,6 +605,7 @@ COMMAND_SPECS: dict[str, CommandSpec] = {
             ParameterSpec("duration", "duration", "Advanced duration override.", value_type="int"),
             ParameterSpec("video_resolution", "video_resolution", "Advanced resolution override."),
             ParameterSpec("model_version", "model_version", "Advanced model override."),
+            SESSION_PARAMETER,
             ParameterSpec("poll", "poll", "Optional polling window in seconds.", value_type="int", min_value=0),
         ),
         examples=(
@@ -615,6 +629,7 @@ COMMAND_SPECS: dict[str, CommandSpec] = {
             ),
             ParameterSpec("duration", "duration", "Video duration in seconds.", value_type="int"),
             ParameterSpec("video_resolution", "video_resolution", "Video resolution override."),
+            SESSION_PARAMETER,
             ParameterSpec("poll", "poll", "Optional polling window in seconds.", value_type="int", min_value=0),
         ),
         examples=(
@@ -632,6 +647,7 @@ COMMAND_SPECS: dict[str, CommandSpec] = {
             ParameterSpec("duration", "duration", "Shorthand duration for exactly two images.", value_type="float"),
             ParameterSpec("transition_prompt", "transition-prompt", "Repeat once per transition segment.", multiple=True),
             ParameterSpec("transition_duration", "transition-duration", "Repeat once per transition segment.", value_type="float", multiple=True),
+            SESSION_PARAMETER,
             ParameterSpec("poll", "poll", "Optional polling window in seconds.", value_type="int", min_value=0),
         ),
         examples=(
@@ -663,6 +679,7 @@ COMMAND_SPECS: dict[str, CommandSpec] = {
                 "Model version.",
                 choices=("seedance2.0", "seedance2.0fast", "seedance2.0_vip", "seedance2.0fast_vip"),
             ),
+            SESSION_PARAMETER,
             ParameterSpec("poll", "poll", "Optional polling window in seconds.", value_type="int", min_value=0),
         ),
         examples=(

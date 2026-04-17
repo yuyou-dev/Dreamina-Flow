@@ -41,12 +41,16 @@ curl -fsSL https://jimeng.jianying.com/cli | bash
 ```bash
 dreamina version
 dreamina login -h
+dreamina relogin -h
+dreamina session -h
+dreamina query_result -h
 dreamina user_credit
 ```
 
 说明：
 
 - `dreamina login --headless` 依赖本机已安装 `Google Chrome`
+- 如果浏览器登录是在另一台机器或另一个终端里完成的，可用 `dreamina import_login_response --file <json>` 手动把登录 JSON 导回本机 CLI
 - 如果命令无法执行，请先确认 Dreamina CLI 已经加入 `PATH`
 
 ![System Status](docs/screenshots/system-status.png)
@@ -94,6 +98,13 @@ npm run dev
 2. 点击顶部的 `Upload Workflow`
 3. 选择 `resources/workflows/` 目录下的任意 `.workflow.json` 文件
 
+## Dreamina CLI 对齐说明
+
+- 所有生成节点现在都暴露可选的 `session` 参数；留空时由 Dreamina CLI 使用默认 session `0`
+- 对于新版 CLI 明确支持“省略并走默认值”的字段，Studio 不再强行写死参数
+- `image2video` 留空 `model_version` 时走基础路径；只有填写 `model_version` / `duration` / `video_resolution` 时才进入 advanced controls
+- 当前 UI / API 仍未直接暴露 `list_task`、`session create/list/search/rename/delete`、`import_login_response`；这些仍然是 CLI-first 能力
+
 ## 验证命令
 
 在仓库根目录执行：
@@ -111,6 +122,7 @@ npm run audit:cli-help
 - `npm run dev` 依赖 `3000` 和 `3100` 两个默认端口；如果端口被占用，请先释放再启动
 - 这个仓库当前的定位是开源源码仓库，不包含远程部署、账号托管或云端服务
 - 登录、积分、二维码和运行状态都通过本地 Dreamina CLI 驱动
+- 登录 UI 当前优先覆盖 headless QR 流；`import_login_response` 手动导入 JSON 兜底流程只在 CLI 中提供
 - 更多实现细节可参考 [docs/technical-overview.md](docs/technical-overview.md) 和 [docs/workflow-json-format.md](docs/workflow-json-format.md)
 - 贡献方式请参考 [CONTRIBUTING.md](CONTRIBUTING.md)
 

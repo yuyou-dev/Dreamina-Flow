@@ -12,8 +12,6 @@ export function createDefaultParams(definition: NodeDefinition): Record<string, 
       accumulator[parameter.key] = parameter.default;
     } else if (definition.defaults[parameter.key] !== undefined) {
       accumulator[parameter.key] = definition.defaults[parameter.key];
-    } else if (parameter.choices && parameter.choices.length > 0) {
-      accumulator[parameter.key] = parameter.choices[0];
     } else if (parameter.multiple) {
       accumulator[parameter.key] = [];
     }
