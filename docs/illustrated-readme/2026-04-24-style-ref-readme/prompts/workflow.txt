@@ -1,0 +1,10 @@
+$imagegen
+Use gpt-image-2 to create one README workflow illustration for "Workflow Studio OSS".
+Aspect ratio: 16:9.
+Language: Simplified Chinese.
+Style: same visual system as the style board: blue-white editorial collage, rounded cards, sticker labels, halftone texture, strong Chinese headline, black outline arrows.
+Purpose: show how one request runs through the system, including OAuth Device Flow login recovery.
+Scene/backdrop: left-to-right execution flow across a workflow canvas, API check, Dreamina login card, polling state, and result return.
+Grounded content only: user edits workflow on canvas, POST /api/nodes/:type/run, POST /api/flows/run, dreamina login --headless, dreamina login checklogin --device_code=..., UI reads verification_uri user_code device_code, blocked action resumes after login succeeds, GET /api/tasks/:submitId.
+Text to include verbatim: Title: "一次运行怎么穿过整套链路". Step 1: "画布编辑与校验". Step 2: "提交节点或整链运行". Step 3: "设备登录与轮询恢复". Step 4: "任务查询与结果回写".
+Constraints: sequence clarity first, readable Simplified Chinese, no invented commands, no extra modules, no watermark, avoid overcrowding.

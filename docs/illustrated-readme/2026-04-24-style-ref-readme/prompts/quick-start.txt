@@ -1,0 +1,10 @@
+$imagegen
+Use gpt-image-2 to create one onboarding or quick-start image for "Workflow Studio OSS".
+Aspect ratio: 16:9.
+Language: Simplified Chinese.
+Style: same blue-white technical collage system, with oversized title, terminal cards, sticker notes, pale-gray background, mint accents, halftone details, rounded white panels.
+Purpose: support the setup/getting-started section of the README.
+Scene/backdrop: terminal desk plus checklist board plus small browser launch card.
+Grounded commands only: curl -fsSL https://jimeng.jianying.com/cli | bash, npm install, npm run dev, http://127.0.0.1:3000, http://127.0.0.1:3100, macOS, Node.js 20+.
+Text to include verbatim: Title: "本地跑起来只要几步". Step 1: "安装 Dreamina CLI". Step 2: "npm install". Step 3: "npm run dev". Note: "当前仓库只在 macOS 验证，默认端口 3000 / 3100".
+Constraints: commands must stay short and readable, no invented steps, no watermark, no fake UI, avoid overcrowding.

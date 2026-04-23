@@ -1,0 +1,10 @@
+$imagegen
+Use gpt-image-2 to create one README architecture illustration for "Workflow Studio OSS".
+Aspect ratio: 16:9.
+Language: Simplified Chinese.
+Style: editorial technical collage consistent with the established style board: cobalt-blue oversized type, cream and pale-gray background, mint accents, rounded white cards, sticker labels, halftone texture, black outline arrows.
+Purpose: support the architecture and repository structure section.
+Scene/backdrop: a layered map of four connected cards representing the repository layers, with arrows showing how the browser UI reaches API, adapter, and workflow core.
+Grounded labels only: "apps/studio-web", "apps/studio-api", "packages/dreamina-adapter", "packages/workflow-core", "GET /api/capabilities", "POST /api/flows/run", "workflow.document/v1alpha1".
+Text to include verbatim: Title: "四层结构一眼看懂". Label 1: "画布与交互". Label 2: "最小 HTTP API". Label 3: "Dreamina CLI 适配层". Label 4: "workflow schema 与执行语义". Caption: "前端编辑，API 编排，Adapter 调 CLI，Core 定义 workflow 语义".
+Constraints: grounded labels only, clean diagram-like composition, readable Simplified Chinese, no invented modules, no fake code, no watermark.

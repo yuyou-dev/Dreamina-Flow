@@ -1,0 +1,10 @@
+$imagegen
+Use gpt-image-2 to create one feature-board image for the README of "Workflow Studio OSS".
+Aspect ratio: 16:9.
+Language: Simplified Chinese.
+Style: cobalt-blue editorial collage, pale-gray paper texture, mint stickers, white rounded panels, halftone texture, bold Chinese typography, black outline icons.
+Purpose: summarize standout capabilities in one board.
+Layout: one large title and five feature panels.
+Grounded features only: node-based workflow editing, import/export .workflow.json, starter workflow and example workflows, local HTTP API plus React Flow canvas, Dreamina OAuth Device Flow status and resume.
+Text to include verbatim: Title: "这个仓库已经具备什么". Feature 1: "把 Dreamina CLI 封装成节点". Feature 2: "浏览器里编辑与运行 workflow". Feature 3: "导入导出 .workflow.json". Feature 4: "内置 starter 与示例 workflow". Feature 5: "登录成功后自动恢复阻塞动作". Caption: "开源示例仓库，适合本地验证 workflow 编排与 Dreamina CLI 对接".
+Constraints: readable panel separation, grounded capabilities only, no fake metrics, no watermark, no invented product claims.

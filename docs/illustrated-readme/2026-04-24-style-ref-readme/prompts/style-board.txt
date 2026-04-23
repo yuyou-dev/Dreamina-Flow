@@ -1,0 +1,9 @@
+$imagegen
+Use gpt-image-2 to create a README visual style board for the repository "Workflow Studio OSS".
+Aspect ratio: 16:9.
+Language: Simplified Chinese.
+Goal: lock the README art direction before generating section images.
+Reference direction: inspired by the collage editorial feel of style-ref/style-reference.jpg, but do not mimic its brand, logo, or characters.
+Show: palette chips, typography direction, panel language, background motifs, rounded white cards, sticker-like callouts, halftone texture, cobalt-blue oversized Chinese typography, pale gray background, black outline details, and one miniature sample composition about a workflow canvas plus terminal bridge.
+Text to include verbatim: Title: "Workflow Studio OSS README 视觉系统". Direction: "蓝白拼贴 / 技术导览 / 中文大字". Palette: "钴蓝 / 米白 / 薄荷绿 / 浅灰". Motif: "圆角卡片 / 贴纸标签 / 工作流箭头".
+Constraints: no watermark, no fake UI copy, no irrelevant mascots, no NewJeans reference, no cookie/food imagery, readable Simplified Chinese, clean editorial board.
