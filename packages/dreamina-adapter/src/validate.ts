@@ -50,13 +50,13 @@ function validateImage2Video(normalized: Record<string, unknown>, errors: string
     return;
   }
   const rules: Record<string, { min: number; max: number; resolutions: string[] }> = {
-    "3.0": { min: 3, max: 10, resolutions: ["720p", "1080p"] },
-    "3.0fast": { min: 3, max: 10, resolutions: ["720p", "1080p"] },
-    "3.0pro": { min: 3, max: 10, resolutions: ["1080p"] },
-    "3.5pro": { min: 4, max: 12, resolutions: ["720p", "1080p"] },
+    "3.0": { min: 3, max: 10, resolutions: ["720p"] },
+    "3.0fast": { min: 3, max: 10, resolutions: ["720p"] },
+    "3.0pro": { min: 3, max: 10, resolutions: ["720p"] },
+    "3.5pro": { min: 4, max: 12, resolutions: ["720p"] },
     "seedance2.0": { min: 4, max: 15, resolutions: ["720p"] },
     "seedance2.0fast": { min: 4, max: 15, resolutions: ["720p"] },
-    "seedance2.0_vip": { min: 4, max: 15, resolutions: ["720p"] },
+    "seedance2.0_vip": { min: 4, max: 15, resolutions: ["720p", "1080p"] },
     "seedance2.0fast_vip": { min: 4, max: 15, resolutions: ["720p"] },
   };
   const normalizedModel = ({ "3.0_fast": "3.0fast", "3.0_pro": "3.0pro", "3.5_pro": "3.5pro" } as Record<string, string>)[modelVersion] ?? modelVersion;
@@ -76,11 +76,11 @@ function validateFrames2Video(normalized: Record<string, unknown>, errors: strin
   const duration = normalized.duration !== undefined ? Number(normalized.duration) : undefined;
   const videoResolution = normalized.video_resolution ? String(normalized.video_resolution) : undefined;
   const rules: Record<string, { min: number; max: number; resolutions: string[] }> = {
-    "3.0": { min: 3, max: 10, resolutions: ["720p", "1080p"] },
-    "3.5pro": { min: 4, max: 12, resolutions: ["720p", "1080p"] },
+    "3.0": { min: 3, max: 10, resolutions: ["720p"] },
+    "3.5pro": { min: 4, max: 12, resolutions: ["720p"] },
     "seedance2.0": { min: 4, max: 15, resolutions: ["720p"] },
     "seedance2.0fast": { min: 4, max: 15, resolutions: ["720p"] },
-    "seedance2.0_vip": { min: 4, max: 15, resolutions: ["720p"] },
+    "seedance2.0_vip": { min: 4, max: 15, resolutions: ["720p", "1080p"] },
     "seedance2.0fast_vip": { min: 4, max: 15, resolutions: ["720p"] },
   };
   const rule = rules[modelVersion];
@@ -91,6 +91,31 @@ function validateFrames2Video(normalized: Record<string, unknown>, errors: strin
   ensureRange(errors, duration, rule.min, rule.max, "frames2video duration");
   if (videoResolution && !rule.resolutions.includes(videoResolution)) {
     errors.push(`frames2video video_resolution must be one of: ${rule.resolutions.join(", ")}.`);
+  }
+}
+
+function validateSeedance2VideoControls(
+  normalized: Record<string, unknown>,
+  errors: string[],
+  label: string,
+): void {
+  const modelVersion = String(normalized.model_version ?? "seedance2.0fast");
+  const duration = normalized.duration !== undefined ? Number(normalized.duration) : undefined;
+  const videoResolution = normalized.video_resolution ? String(normalized.video_resolution) : undefined;
+  const rules: Record<string, { min: number; max: number; resolutions: string[] }> = {
+    "seedance2.0": { min: 4, max: 15, resolutions: ["720p"] },
+    "seedance2.0fast": { min: 4, max: 15, resolutions: ["720p"] },
+    "seedance2.0_vip": { min: 4, max: 15, resolutions: ["720p", "1080p"] },
+    "seedance2.0fast_vip": { min: 4, max: 15, resolutions: ["720p"] },
+  };
+  const rule = rules[modelVersion];
+  if (!rule) {
+    errors.push(`Unsupported ${label} model_version: ${modelVersion}.`);
+    return;
+  }
+  ensureRange(errors, duration, rule.min, rule.max, `${label} duration`);
+  if (videoResolution && !rule.resolutions.includes(videoResolution)) {
+    errors.push(`${label} video_resolution must be one of: ${rule.resolutions.join(", ")}.`);
   }
 }
 
@@ -155,7 +180,7 @@ function validateMultimodal2Video(normalized: Record<string, unknown>, errors: s
   if (audios.length > 3) {
     errors.push("multimodal2video supports at most 3 audio files.");
   }
-  ensureRange(errors, normalized.duration !== undefined ? Number(normalized.duration) : undefined, 4, 15, "multimodal2video duration");
+  validateSeedance2VideoControls(normalized, errors, "multimodal2video");
 }
 
 function validateImage2Image(normalized: Record<string, unknown>, errors: string[]): void {
@@ -291,7 +316,7 @@ export function validateNodeRun(
       validateMultimodal2Video(normalizedParams, errors);
       break;
     case "text2video":
-      ensureRange(errors, normalizedParams.duration !== undefined ? Number(normalizedParams.duration) : undefined, 4, 15, "text2video duration");
+      validateSeedance2VideoControls(normalizedParams, errors, "text2video");
       break;
     default:
       break;

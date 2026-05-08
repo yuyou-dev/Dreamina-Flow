@@ -76,8 +76,13 @@ async function getRawHelp(command: string): Promise<string> {
   return response.stdout || response.stderr;
 }
 
+const rawCliFlagOverrides: Record<string, string> = {
+  transition_prompt: "transition-prompt",
+  transition_duration: "transition-duration",
+};
+
 function toFlagName(key: string): string {
-  return `--${key.replace(/_/g, "-")}`;
+  return `--${rawCliFlagOverrides[key] ?? key}`;
 }
 
 function appendArgs(args: string[], key: string, value: unknown): void {

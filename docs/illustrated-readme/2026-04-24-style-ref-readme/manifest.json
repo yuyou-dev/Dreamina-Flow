@@ -68,7 +68,7 @@
         "单节点路径：先调用 `/api/nodes/:type/validate`，再调用 `/api/nodes/:type/run`。",
         "整链路径：提交完整 workflow 到 `/api/flows/run`，由 API 解析 processor chain 并调用 adapter。",
         "设备登录使用 `dreamina login --headless` / `dreamina relogin --headless`，再用 `dreamina login checklogin --device_code=...` 轮询。",
-        "登录 UI 优先覆盖 OAuth Device Flow，如果 CLI 输出旧 QR 形式，界面会按兼容信息显示。"
+        "登录 UI 以 OAuth Device Flow 为主线，不再依赖旧的浏览器 callback 或手动导入登录形式。"
       ]
     },
     {
