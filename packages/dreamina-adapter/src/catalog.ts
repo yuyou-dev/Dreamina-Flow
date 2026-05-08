@@ -72,7 +72,15 @@ const processorTemplates: Record<string, ProcessorNodeTemplate> = {
     outputs: [{ id: "video", label: "Video", type: "video" }],
     defaults: { duration: 5, model_version: "seedance2.0fast", poll: getDefaultPollSeconds("text2video") },
     warnings: ["Some Seedance models may require one-time web authorization before use."],
-    constraints: { supportedRatios: videoRatioChoices },
+    constraints: {
+      supportedRatios: videoRatioChoices,
+      modelRules: {
+        "seedance2.0": { duration: [4, 15], video_resolution: ["720p"] },
+        "seedance2.0fast": { duration: [4, 15], video_resolution: ["720p"] },
+        "seedance2.0_vip": { duration: [4, 15], video_resolution: ["720p", "1080p"] },
+        "seedance2.0fast_vip": { duration: [4, 15], video_resolution: ["720p"] },
+      },
+    },
   },
   image2video: {
     title: "Image to Video",
@@ -88,13 +96,13 @@ const processorTemplates: Record<string, ProcessorNodeTemplate> = {
     ],
     constraints: {
       modelRules: {
-        "3.0": { duration: [3, 10], video_resolution: ["720p", "1080p"] },
-        "3.0fast": { duration: [3, 10], video_resolution: ["720p", "1080p"] },
-        "3.0pro": { duration: [3, 10], video_resolution: ["1080p"] },
-        "3.5pro": { duration: [4, 12], video_resolution: ["720p", "1080p"] },
+        "3.0": { duration: [3, 10], video_resolution: ["720p"] },
+        "3.0fast": { duration: [3, 10], video_resolution: ["720p"] },
+        "3.0pro": { duration: [3, 10], video_resolution: ["720p"] },
+        "3.5pro": { duration: [4, 12], video_resolution: ["720p"] },
         "seedance2.0": { duration: [4, 15], video_resolution: ["720p"] },
         "seedance2.0fast": { duration: [4, 15], video_resolution: ["720p"] },
-        "seedance2.0_vip": { duration: [4, 15], video_resolution: ["720p"] },
+        "seedance2.0_vip": { duration: [4, 15], video_resolution: ["720p", "1080p"] },
         "seedance2.0fast_vip": { duration: [4, 15], video_resolution: ["720p"] },
       },
       aliases: {
@@ -118,11 +126,11 @@ const processorTemplates: Record<string, ProcessorNodeTemplate> = {
     warnings: ["Ratio is inferred from the first frame image."],
     constraints: {
       modelRules: {
-        "3.0": { duration: [3, 10], video_resolution: ["720p", "1080p"] },
-        "3.5pro": { duration: [4, 12], video_resolution: ["720p", "1080p"] },
+        "3.0": { duration: [3, 10], video_resolution: ["720p"] },
+        "3.5pro": { duration: [4, 12], video_resolution: ["720p"] },
         "seedance2.0": { duration: [4, 15], video_resolution: ["720p"] },
         "seedance2.0fast": { duration: [4, 15], video_resolution: ["720p"] },
-        "seedance2.0_vip": { duration: [4, 15], video_resolution: ["720p"] },
+        "seedance2.0_vip": { duration: [4, 15], video_resolution: ["720p", "1080p"] },
         "seedance2.0fast_vip": { duration: [4, 15], video_resolution: ["720p"] },
       },
       inferredFields: ["ratio"],
@@ -163,6 +171,12 @@ const processorTemplates: Record<string, ProcessorNodeTemplate> = {
     ],
     constraints: {
       supportedRatios: videoRatioChoices,
+      modelRules: {
+        "seedance2.0": { duration: [4, 15], video_resolution: ["720p"] },
+        "seedance2.0fast": { duration: [4, 15], video_resolution: ["720p"] },
+        "seedance2.0_vip": { duration: [4, 15], video_resolution: ["720p", "1080p"] },
+        "seedance2.0fast_vip": { duration: [4, 15], video_resolution: ["720p"] },
+      },
       maxInputs: { image: 9, video: 3, audio: 3 },
     },
   },

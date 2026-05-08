@@ -47,16 +47,13 @@ class ParameterSpec:
     @property
     def argument_names(self) -> tuple[str, ...]:
         names = []
-        hyphen_name = f"--{self.key.replace('_', '-')}"
+        cli_name = f"--{self.cli_flag}"
         underscore_name = f"--{self.key}"
+        hyphen_name = f"--{self.key.replace('_', '-')}"
 
-        for candidate in (hyphen_name, underscore_name):
+        for candidate in (cli_name, underscore_name, hyphen_name):
             if candidate not in names:
                 names.append(candidate)
-
-        cli_name = f"--{self.cli_flag}"
-        if cli_name not in names:
-            names.append(cli_name)
 
         return tuple(names)
 
@@ -339,23 +336,33 @@ def validate_image2video(namespace: argparse.Namespace) -> None:
     if not namespace.model_version:
         return
 
-    if namespace.model_version in {"3.0", "3.0fast"}:
+    if namespace.model_version in {"3.0", "3.0fast", "3.0pro"}:
         validate_integer_in_range(namespace.duration, 3, 10, "duration")
-        validate_choice(namespace.video_resolution, {"720p", "1080p"}, "video_resolution")
-        return
-
-    if namespace.model_version == "3.0pro":
-        validate_integer_in_range(namespace.duration, 3, 10, "duration")
-        validate_choice(namespace.video_resolution, {"1080p"}, "video_resolution")
+        validate_choice(namespace.video_resolution, {"720p"}, "video_resolution")
         return
 
     if namespace.model_version == "3.5pro":
         validate_integer_in_range(namespace.duration, 4, 12, "duration")
+        validate_choice(namespace.video_resolution, {"720p"}, "video_resolution")
+        return
+
+    if namespace.model_version == "seedance2.0_vip":
+        validate_integer_in_range(namespace.duration, 4, 15, "duration")
         validate_choice(namespace.video_resolution, {"720p", "1080p"}, "video_resolution")
         return
 
     validate_integer_in_range(namespace.duration, 4, 15, "duration")
     validate_choice(namespace.video_resolution, {"720p"}, "video_resolution")
+
+
+def validate_text2video(namespace: argparse.Namespace) -> None:
+    effective_model = namespace.model_version or "seedance2.0fast"
+    validate_integer_in_range(namespace.duration, 4, 15, "duration")
+    validate_choice(
+        namespace.video_resolution,
+        {"720p", "1080p"} if effective_model == "seedance2.0_vip" else {"720p"},
+        "video_resolution",
+    )
 
 
 def validate_frames2video(namespace: argparse.Namespace) -> None:
@@ -364,11 +371,16 @@ def validate_frames2video(namespace: argparse.Namespace) -> None:
 
     if effective_model == "3.0":
         validate_integer_in_range(namespace.duration, 3, 10, "duration")
-        validate_choice(namespace.video_resolution, {"720p", "1080p"}, "video_resolution")
+        validate_choice(namespace.video_resolution, {"720p"}, "video_resolution")
         return
 
     if effective_model == "3.5pro":
         validate_integer_in_range(namespace.duration, 4, 12, "duration")
+        validate_choice(namespace.video_resolution, {"720p"}, "video_resolution")
+        return
+
+    if effective_model == "seedance2.0_vip":
+        validate_integer_in_range(namespace.duration, 4, 15, "duration")
         validate_choice(namespace.video_resolution, {"720p", "1080p"}, "video_resolution")
         return
 
@@ -441,6 +453,13 @@ def validate_multimodal2video(namespace: argparse.Namespace) -> None:
     if not images and not videos:
         raise DreaminaWrapperError("multimodal2video requires at least one image or one video.")
 
+    effective_model = namespace.model_version or "seedance2.0fast"
+    validate_choice(
+        namespace.video_resolution,
+        {"720p", "1080p"} if effective_model == "seedance2.0_vip" else {"720p"},
+        "video_resolution",
+    )
+
 
 def validate_integer_in_range(
     value: int | None,
@@ -507,7 +526,7 @@ COMMAND_SPECS: dict[str, CommandSpec] = {
             ParameterSpec("poll", "poll", "Optional polling window in seconds.", value_type="int", min_value=0),
         ),
         examples=(
-            'python3 packages/dreamina-adapter/scripts/text2image.py --prompt "a silver ring on white" --ratio 1:1 --resolution-type 2k',
+            'python3 packages/dreamina-adapter/scripts/text2image.py --prompt "a silver ring on white" --ratio 1:1 --resolution_type 2k',
         ),
     ),
     "image2image": CommandSpec(
@@ -559,13 +578,14 @@ COMMAND_SPECS: dict[str, CommandSpec] = {
             ParameterSpec("poll", "poll", "Optional polling window in seconds.", value_type="int", min_value=0),
         ),
         examples=(
-            "python3 packages/dreamina-adapter/scripts/image_upscale.py --image ./product.png --resolution-type 4k",
+            "python3 packages/dreamina-adapter/scripts/image_upscale.py --image ./product.png --resolution_type 4k",
         ),
     ),
     "text2video": CommandSpec(
         name="text2video",
         description="Submit a Dreamina text-to-video task.",
         output_mode="json",
+        validator=validate_text2video,
         parameters=(
             ParameterSpec("prompt", "prompt", "Generation prompt.", required=True),
             ParameterSpec("duration", "duration", "Video duration in seconds.", value_type="int", min_value=4, max_value=15),
@@ -579,7 +599,7 @@ COMMAND_SPECS: dict[str, CommandSpec] = {
                 "video_resolution",
                 "video_resolution",
                 "Video resolution.",
-                choices=("720p",),
+                choices=("720p", "1080p"),
             ),
             ParameterSpec(
                 "model_version",
@@ -609,7 +629,7 @@ COMMAND_SPECS: dict[str, CommandSpec] = {
             ParameterSpec("poll", "poll", "Optional polling window in seconds.", value_type="int", min_value=0),
         ),
         examples=(
-            'python3 packages/dreamina-adapter/scripts/image2video.py --image ./cover.png --prompt "subtle camera push in" --model-version 3.5pro --duration 6 --video-resolution 1080p',
+            'python3 packages/dreamina-adapter/scripts/image2video.py --image ./cover.png --prompt "subtle camera push in" --model_version seedance2.0_vip --duration 6 --video_resolution 1080p',
         ),
     ),
     "frames2video": CommandSpec(
@@ -633,7 +653,7 @@ COMMAND_SPECS: dict[str, CommandSpec] = {
             ParameterSpec("poll", "poll", "Optional polling window in seconds.", value_type="int", min_value=0),
         ),
         examples=(
-            'python3 packages/dreamina-adapter/scripts/frames2video.py --first ./start.png --last ./end.png --prompt "season changes around the subject" --model-version seedance2.0fast',
+            'python3 packages/dreamina-adapter/scripts/frames2video.py --first ./start.png --last ./end.png --prompt "season changes around the subject" --model_version seedance2.0fast',
         ),
     ),
     "multiframe2video": CommandSpec(
@@ -672,7 +692,7 @@ COMMAND_SPECS: dict[str, CommandSpec] = {
                 "Output aspect ratio.",
                 choices=("1:1", "3:4", "16:9", "4:3", "9:16", "21:9"),
             ),
-            ParameterSpec("video_resolution", "video_resolution", "Video resolution.", choices=("720p",)),
+            ParameterSpec("video_resolution", "video_resolution", "Video resolution.", choices=("720p", "1080p")),
             ParameterSpec(
                 "model_version",
                 "model_version",
@@ -683,7 +703,7 @@ COMMAND_SPECS: dict[str, CommandSpec] = {
             ParameterSpec("poll", "poll", "Optional polling window in seconds.", value_type="int", min_value=0),
         ),
         examples=(
-            'python3 packages/dreamina-adapter/scripts/multimodal2video.py --image ./scene.png --audio ./music.mp3 --model-version seedance2.0fast --duration 5',
+            'python3 packages/dreamina-adapter/scripts/multimodal2video.py --image ./scene.png --audio ./music.mp3 --model_version seedance2.0fast --duration 5',
         ),
     ),
     "query_result": CommandSpec(
@@ -695,7 +715,7 @@ COMMAND_SPECS: dict[str, CommandSpec] = {
             ParameterSpec("download_dir", "download_dir", "Optional result download directory.", path_mode="dir", create_dir=True),
         ),
         examples=(
-            "python3 packages/dreamina-adapter/scripts/query_result.py --submit-id 3f6eb41f425d23a3",
+            "python3 packages/dreamina-adapter/scripts/query_result.py --submit_id 3f6eb41f425d23a3",
         ),
     ),
     "version": CommandSpec(

@@ -125,6 +125,99 @@ describe("dreamina-adapter", () => {
     expect(result.normalizedParams.model_version).toBe("3.0fast");
   });
 
+  it("validates updated Seedance 2.0 video resolution rules", () => {
+    const text2videoProcessor = {
+      name: "text2video",
+      title: "Text to Video",
+      category: "processor" as const,
+      description: "Processor node.",
+      inputs: [{ id: "prompt", label: "Prompt", type: "text" as const, required: true }],
+      outputs: [{ id: "video", label: "Video", type: "video" as const }],
+      params: [
+        { key: "duration", label: "Duration (s)", type: "number" as const },
+        { key: "video_resolution", label: "Resolution", type: "select" as const, choices: ["720p", "1080p"] },
+        {
+          key: "model_version",
+          label: "Model",
+          type: "select" as const,
+          choices: ["seedance2.0", "seedance2.0fast", "seedance2.0_vip", "seedance2.0fast_vip"],
+        },
+      ],
+      defaults: {},
+      outputMode: "json",
+      wrapperAvailable: true,
+      rawCliAvailable: true,
+      constraints: {},
+      warnings: [],
+    };
+
+    const invalidFast = validateNodeRun(
+      text2videoProcessor,
+      { model_version: "seedance2.0fast", video_resolution: "1080p", duration: 5 },
+      { prompt: [{ kind: "text", text: "A cinematic camera push." }] },
+    );
+    expect(invalidFast.ok).toBe(false);
+    expect(invalidFast.errors).toContain("text2video video_resolution must be one of: 720p.");
+
+    const validVip = validateNodeRun(
+      text2videoProcessor,
+      { model_version: "seedance2.0_vip", video_resolution: "1080p", duration: 5 },
+      { prompt: [{ kind: "text", text: "A cinematic camera push." }] },
+    );
+    expect(validVip.ok).toBe(true);
+  });
+
+  it("validates updated image2video resolution rules", () => {
+    const image2videoProcessor = {
+      name: "image2video",
+      title: "Image to Video",
+      category: "processor" as const,
+      description: "Processor node.",
+      inputs: [
+        { id: "image", label: "First Frame", type: "image" as const, required: true },
+        { id: "prompt", label: "Prompt", type: "text" as const, required: true },
+      ],
+      outputs: [{ id: "video", label: "Video", type: "video" as const }],
+      params: [
+        { key: "duration", label: "Duration (s)", type: "number" as const },
+        { key: "video_resolution", label: "Resolution", type: "select" as const, choices: ["720p", "1080p"] },
+        {
+          key: "model_version",
+          label: "Model",
+          type: "select" as const,
+          choices: ["3.0", "3.0fast", "3.0pro", "3.5pro", "seedance2.0_vip"],
+        },
+      ],
+      defaults: {},
+      outputMode: "json",
+      wrapperAvailable: true,
+      rawCliAvailable: true,
+      constraints: {},
+      warnings: [],
+    };
+
+    const invalidPro = validateNodeRun(
+      image2videoProcessor,
+      { model_version: "3.5pro", video_resolution: "1080p", duration: 6 },
+      {
+        image: [{ kind: "image", localPath: "/tmp/first.png" }],
+        prompt: [{ kind: "text", text: "Add a gentle push-in." }],
+      },
+    );
+    expect(invalidPro.ok).toBe(false);
+    expect(invalidPro.errors).toContain("image2video video_resolution must be one of: 720p.");
+
+    const validVip = validateNodeRun(
+      image2videoProcessor,
+      { model_version: "seedance2.0_vip", video_resolution: "1080p", duration: 6 },
+      {
+        image: [{ kind: "image", localPath: "/tmp/first.png" }],
+        prompt: [{ kind: "text", text: "Add a gentle push-in." }],
+      },
+    );
+    expect(validVip.ok).toBe(true);
+  });
+
   it("normalizes terminal output for QR-style login sessions", () => {
     const output = normalizeTerminalOutput("\u001b[31mQR\u001b[0m\r\ncode");
     expect(output).toContain("QR");
