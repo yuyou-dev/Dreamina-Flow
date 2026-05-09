@@ -5,6 +5,7 @@ import {
   createDefaultParams,
   prepareStarterWorkflowDocument,
   prepareWorkflowDocumentImport,
+  resolveNodeParamRules,
   type AdapterStatus,
   type NodeDefinition,
 } from "../src/index.js";
@@ -199,5 +200,116 @@ describe("workflow-core", () => {
       model_version: "seedance2.0fast",
       poll: 1800,
     });
+  });
+
+  it("narrows text2video resolution choices from the selected model", () => {
+    const textToVideo: NodeDefinition = {
+      name: "text2video",
+      title: "Text to Video",
+      category: "processor",
+      description: "Processor node.",
+      inputs: [{ id: "prompt", label: "Prompt", type: "text", required: true }],
+      outputs: [{ id: "video", label: "Video", type: "video" }],
+      params: [
+        { key: "duration", label: "Duration", type: "number", default: 5 },
+        { key: "video_resolution", label: "Resolution", type: "select", choices: ["720p", "1080p"] },
+        {
+          key: "model_version",
+          label: "Model",
+          type: "select",
+          choices: ["seedance2.0", "seedance2.0fast", "seedance2.0_vip", "seedance2.0fast_vip"],
+          default: "seedance2.0fast",
+        },
+        { key: "poll", label: "Poll", type: "number", default: 1800 },
+      ],
+      defaults: { duration: 5, model_version: "seedance2.0fast", poll: 1800 },
+      outputMode: "json",
+      wrapperAvailable: true,
+      rawCliAvailable: true,
+      constraints: {
+        modelRules: {
+          "seedance2.0": { duration: [4, 15], video_resolution: ["720p"] },
+          "seedance2.0fast": { duration: [4, 15], video_resolution: ["720p"] },
+          "seedance2.0_vip": { duration: [4, 15], video_resolution: ["720p", "1080p"] },
+          "seedance2.0fast_vip": { duration: [4, 15], video_resolution: ["720p"] },
+        },
+      },
+      warnings: [],
+    };
+
+    const fastResolution = resolveNodeParamRules(textToVideo, {
+      model_version: "seedance2.0fast",
+      video_resolution: "1080p",
+      duration: 5,
+    });
+    expect(fastResolution.paramStates.video_resolution?.choices).toEqual(["720p"]);
+    expect(fastResolution.params.video_resolution).toBe("720p");
+
+    const vipResolution = resolveNodeParamRules(textToVideo, {
+      model_version: "seedance2.0_vip",
+      video_resolution: "1080p",
+      duration: 5,
+    });
+    expect(vipResolution.paramStates.video_resolution?.choices).toEqual(["720p", "1080p"]);
+    expect(vipResolution.params.video_resolution).toBe("1080p");
+  });
+
+  it("narrows multimodal2video resolution choices from the selected model", () => {
+    const multimodalToVideo: NodeDefinition = {
+      name: "multimodal2video",
+      title: "Multimodal to Video",
+      category: "processor",
+      description: "Processor node.",
+      inputs: [
+        { id: "image", label: "Images", type: "image", multiple: true },
+        { id: "video", label: "Videos", type: "video", multiple: true },
+        { id: "audio", label: "Audio", type: "audio", multiple: true },
+        { id: "prompt", label: "Prompt", type: "text" },
+      ],
+      outputs: [{ id: "video", label: "Video", type: "video" }],
+      params: [
+        { key: "duration", label: "Duration", type: "number", default: 5 },
+        { key: "video_resolution", label: "Resolution", type: "select", choices: ["720p", "1080p"] },
+        {
+          key: "model_version",
+          label: "Model",
+          type: "select",
+          choices: ["seedance2.0", "seedance2.0fast", "seedance2.0_vip", "seedance2.0fast_vip"],
+        },
+        { key: "poll", label: "Poll", type: "number", default: 1800 },
+      ],
+      defaults: { duration: 5, poll: 1800 },
+      outputMode: "json",
+      wrapperAvailable: true,
+      rawCliAvailable: true,
+      constraints: {
+        modelRules: {
+          "seedance2.0": { duration: [4, 15], video_resolution: ["720p"] },
+          "seedance2.0fast": { duration: [4, 15], video_resolution: ["720p"] },
+          "seedance2.0_vip": { duration: [4, 15], video_resolution: ["720p", "1080p"] },
+          "seedance2.0fast_vip": { duration: [4, 15], video_resolution: ["720p"] },
+        },
+      },
+      warnings: [],
+    };
+
+    const unspecifiedModelResolution = resolveNodeParamRules(multimodalToVideo, {});
+    expect(unspecifiedModelResolution.paramStates.video_resolution?.choices).toEqual(["720p", "1080p"]);
+
+    const fastResolution = resolveNodeParamRules(multimodalToVideo, {
+      model_version: "seedance2.0fast",
+      video_resolution: "1080p",
+      duration: 5,
+    });
+    expect(fastResolution.paramStates.video_resolution?.choices).toEqual(["720p"]);
+    expect(fastResolution.params.video_resolution).toBe("720p");
+
+    const vipResolution = resolveNodeParamRules(multimodalToVideo, {
+      model_version: "seedance2.0_vip",
+      video_resolution: "1080p",
+      duration: 5,
+    });
+    expect(vipResolution.paramStates.video_resolution?.choices).toEqual(["720p", "1080p"]);
+    expect(vipResolution.params.video_resolution).toBe("1080p");
   });
 });

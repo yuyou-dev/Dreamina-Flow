@@ -85,11 +85,32 @@ function allowsAdvancedControls(definition: NodeDefinition): boolean {
   return Boolean(asRecord(definition.constraints).requiresModelForAdvancedControls);
 }
 
+function hasModelRules(modelRules: Record<string, ModelRule>): boolean {
+  return Object.keys(modelRules).length > 0;
+}
+
 function orderedChoices(param: NodeParamDefinition | undefined, allowed: string[]): string[] {
   if (!param?.choices || param.choices.length === 0) {
     return allowed;
   }
   return param.choices.filter((choice) => allowed.includes(choice));
+}
+
+function unionModelRuleChoices(
+  modelRules: Record<string, ModelRule>,
+  key: "video_resolution",
+  fallbackChoices: string[] = [],
+): string[] {
+  const values = new Set<string>();
+  Object.values(modelRules).forEach((rule) => {
+    (rule[key] ?? []).forEach((choice) => values.add(choice));
+  });
+  const preferredOrder = ["720p", "1080p"];
+  const ordered = preferredOrder.filter((choice) => values.has(choice));
+  if (ordered.length > 0) {
+    return ordered;
+  }
+  return fallbackChoices;
 }
 
 function firstAllowedChoice(definition: NodeDefinition, key: string, allowedChoices: string[]): string {
@@ -217,7 +238,7 @@ export function resolveNodeParamRules(definition: NodeDefinition, rawParams: Rec
     return { params, paramStates, warning, corrections, effectiveModel: modelVersion || null };
   }
 
-  if (definition.name !== "image2video" && definition.name !== "frames2video") {
+  if (!hasModelRules(modelRules)) {
     return { params, paramStates, warning, corrections, effectiveModel: null };
   }
 
@@ -225,11 +246,7 @@ export function resolveNodeParamRules(definition: NodeDefinition, rawParams: Rec
   const resolutionParam = definition.params.find((param) => param.key === "video_resolution");
   const modelVersion = typeof params.model_version === "string" ? params.model_version : "";
 
-  if (definition.name === "frames2video") {
-    effectiveModel = modelVersion || String(definition.defaults.model_version ?? "seedance2.0fast");
-  } else {
-    effectiveModel = modelVersion || null;
-  }
+  effectiveModel = modelVersion || (typeof definition.defaults.model_version === "string" ? definition.defaults.model_version : null);
 
   if (definition.name === "image2video" && allowsAdvancedControls(definition) && !effectiveModel) {
     if (params.duration !== undefined && params.duration !== "") {
@@ -248,6 +265,15 @@ export function resolveNodeParamRules(definition: NodeDefinition, rawParams: Rec
 
   const appliedRule = effectiveModel ? modelRules[effectiveModel] : undefined;
   if (!appliedRule) {
+    if (resolutionParam) {
+      paramStates.video_resolution = {
+        ...paramStates.video_resolution,
+        choices: orderedChoices(
+          resolutionParam,
+          unionModelRuleChoices(modelRules, "video_resolution", resolutionParam.choices ?? []),
+        ),
+      };
+    }
     if (modelParam?.choices) {
       paramStates.model_version = {
         ...paramStates.model_version,

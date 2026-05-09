@@ -326,7 +326,8 @@ export function WorkflowNodeCard({ id, data }: { id: string; data: WorkflowCanva
                   const currentValue = paramRuleView.params[param.key];
                   const paramState = paramRuleView.paramStates[param.key] ?? {};
                   const availableChoices = paramState.choices ?? param.choices;
-                  const shouldShowEmptyChoice = param.type === "select" && (((availableChoices?.length ?? 0) === 0) || currentValue === "");
+                  const hasEmptyValue = currentValue === undefined || currentValue === null || currentValue === "";
+                  const shouldShowEmptyChoice = param.type === "select" && (((availableChoices?.length ?? 0) === 0) || hasEmptyValue);
                   return (
                     <div key={param.key} className="flex flex-col gap-1">
                       <label className="text-[8px] font-black text-black uppercase tracking-[0.16em]">{param.label}</label>
