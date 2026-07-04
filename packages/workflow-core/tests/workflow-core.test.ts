@@ -178,18 +178,18 @@ describe("workflow-core", () => {
       outputs: [{ id: "video", label: "Video", type: "video" }],
       params: [
         { key: "duration", label: "Duration", type: "number", default: 5 },
-        { key: "video_resolution", label: "Resolution", type: "select", choices: ["720p", "1080p"] },
-        { key: "model_version", label: "Model", type: "select", choices: ["3.0", "seedance2.0fast"], default: "seedance2.0fast" },
+        { key: "video_resolution", label: "Resolution", type: "select", choices: ["720p", "1080p", "4k"] },
+        { key: "model_version", label: "Model", type: "select", choices: ["seedance1.5pro", "seedance2.0_vip"], default: "seedance2.0_vip" },
         { key: "poll", label: "Poll", type: "number", default: 1800 },
       ],
-      defaults: { duration: 5, model_version: "seedance2.0fast", poll: 1800 },
+      defaults: { duration: 5, model_version: "seedance2.0_vip", poll: 1800 },
       outputMode: "json",
       wrapperAvailable: true,
       rawCliAvailable: true,
       constraints: {
         modelRules: {
-          "3.0": { duration: [3, 10], video_resolution: ["720p", "1080p"] },
-          "seedance2.0fast": { duration: [4, 15], video_resolution: ["720p"] },
+          "seedance1.5pro": { duration: [4, 12], video_resolution: ["720p"] },
+          "seedance2.0_vip": { duration: [4, 15], video_resolution: ["720p", "1080p", "4k"] },
         },
       },
       warnings: [],
@@ -197,7 +197,7 @@ describe("workflow-core", () => {
 
     expect(createDefaultParams(framesToVideo)).toEqual({
       duration: 5,
-      model_version: "seedance2.0fast",
+      model_version: "seedance2.0_vip",
       poll: 1800,
     });
   });
@@ -212,12 +212,12 @@ describe("workflow-core", () => {
       outputs: [{ id: "video", label: "Video", type: "video" }],
       params: [
         { key: "duration", label: "Duration", type: "number", default: 5 },
-        { key: "video_resolution", label: "Resolution", type: "select", choices: ["720p", "1080p"] },
+        { key: "video_resolution", label: "Resolution", type: "select", choices: ["720p", "1080p", "4k"] },
         {
           key: "model_version",
           label: "Model",
           type: "select",
-          choices: ["seedance2.0", "seedance2.0fast", "seedance2.0_vip", "seedance2.0fast_vip"],
+          choices: ["seedance2.0", "seedance2.0fast", "seedance2.0_vip", "seedance2.0fast_vip", "seedance2.0mini"],
           default: "seedance2.0fast",
         },
         { key: "poll", label: "Poll", type: "number", default: 1800 },
@@ -230,8 +230,9 @@ describe("workflow-core", () => {
         modelRules: {
           "seedance2.0": { duration: [4, 15], video_resolution: ["720p"] },
           "seedance2.0fast": { duration: [4, 15], video_resolution: ["720p"] },
-          "seedance2.0_vip": { duration: [4, 15], video_resolution: ["720p", "1080p"] },
+          "seedance2.0_vip": { duration: [4, 15], video_resolution: ["720p", "1080p", "4k"] },
           "seedance2.0fast_vip": { duration: [4, 15], video_resolution: ["720p"] },
+          "seedance2.0mini": { duration: [4, 15], video_resolution: ["720p"] },
         },
       },
       warnings: [],
@@ -239,19 +240,27 @@ describe("workflow-core", () => {
 
     const fastResolution = resolveNodeParamRules(textToVideo, {
       model_version: "seedance2.0fast",
-      video_resolution: "1080p",
+      video_resolution: "4k",
       duration: 5,
     });
     expect(fastResolution.paramStates.video_resolution?.choices).toEqual(["720p"]);
     expect(fastResolution.params.video_resolution).toBe("720p");
 
-    const vipResolution = resolveNodeParamRules(textToVideo, {
-      model_version: "seedance2.0_vip",
-      video_resolution: "1080p",
+    const miniResolution = resolveNodeParamRules(textToVideo, {
+      model_version: "seedance2.0mini",
+      video_resolution: "4k",
       duration: 5,
     });
-    expect(vipResolution.paramStates.video_resolution?.choices).toEqual(["720p", "1080p"]);
-    expect(vipResolution.params.video_resolution).toBe("1080p");
+    expect(miniResolution.paramStates.video_resolution?.choices).toEqual(["720p"]);
+    expect(miniResolution.params.video_resolution).toBe("720p");
+
+    const vipResolution = resolveNodeParamRules(textToVideo, {
+      model_version: "seedance2.0_vip",
+      video_resolution: "4k",
+      duration: 5,
+    });
+    expect(vipResolution.paramStates.video_resolution?.choices).toEqual(["720p", "1080p", "4k"]);
+    expect(vipResolution.params.video_resolution).toBe("4k");
   });
 
   it("narrows multimodal2video resolution choices from the selected model", () => {
@@ -269,12 +278,12 @@ describe("workflow-core", () => {
       outputs: [{ id: "video", label: "Video", type: "video" }],
       params: [
         { key: "duration", label: "Duration", type: "number", default: 5 },
-        { key: "video_resolution", label: "Resolution", type: "select", choices: ["720p", "1080p"] },
+        { key: "video_resolution", label: "Resolution", type: "select", choices: ["720p", "1080p", "4k"] },
         {
           key: "model_version",
           label: "Model",
           type: "select",
-          choices: ["seedance2.0", "seedance2.0fast", "seedance2.0_vip", "seedance2.0fast_vip"],
+          choices: ["seedance2.0", "seedance2.0fast", "seedance2.0_vip", "seedance2.0fast_vip", "seedance2.0mini"],
         },
         { key: "poll", label: "Poll", type: "number", default: 1800 },
       ],
@@ -286,19 +295,20 @@ describe("workflow-core", () => {
         modelRules: {
           "seedance2.0": { duration: [4, 15], video_resolution: ["720p"] },
           "seedance2.0fast": { duration: [4, 15], video_resolution: ["720p"] },
-          "seedance2.0_vip": { duration: [4, 15], video_resolution: ["720p", "1080p"] },
+          "seedance2.0_vip": { duration: [4, 15], video_resolution: ["720p", "1080p", "4k"] },
           "seedance2.0fast_vip": { duration: [4, 15], video_resolution: ["720p"] },
+          "seedance2.0mini": { duration: [4, 15], video_resolution: ["720p"] },
         },
       },
       warnings: [],
     };
 
     const unspecifiedModelResolution = resolveNodeParamRules(multimodalToVideo, {});
-    expect(unspecifiedModelResolution.paramStates.video_resolution?.choices).toEqual(["720p", "1080p"]);
+    expect(unspecifiedModelResolution.paramStates.video_resolution?.choices).toEqual(["720p", "1080p", "4k"]);
 
     const fastResolution = resolveNodeParamRules(multimodalToVideo, {
       model_version: "seedance2.0fast",
-      video_resolution: "1080p",
+      video_resolution: "4k",
       duration: 5,
     });
     expect(fastResolution.paramStates.video_resolution?.choices).toEqual(["720p"]);
@@ -306,10 +316,10 @@ describe("workflow-core", () => {
 
     const vipResolution = resolveNodeParamRules(multimodalToVideo, {
       model_version: "seedance2.0_vip",
-      video_resolution: "1080p",
+      video_resolution: "4k",
       duration: 5,
     });
-    expect(vipResolution.paramStates.video_resolution?.choices).toEqual(["720p", "1080p"]);
-    expect(vipResolution.params.video_resolution).toBe("1080p");
+    expect(vipResolution.paramStates.video_resolution?.choices).toEqual(["720p", "1080p", "4k"]);
+    expect(vipResolution.params.video_resolution).toBe("4k");
   });
 });

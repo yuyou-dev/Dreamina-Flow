@@ -22,10 +22,30 @@ GENERATION_COMMANDS = {
 }
 
 VALID_SUBMIT_STATUSES = {"querying", "success"}
+TEXT2IMAGE_MODELS = ("3.0", "3.1", "4.0", "4.1", "4.5", "4.6", "4.7", "5.0")
+IMAGE2IMAGE_MODELS = ("4.0", "4.1", "4.5", "4.6", "4.7", "5.0")
+SEEDANCE2_VIDEO_MODELS = (
+    "seedance2.0",
+    "seedance2.0fast",
+    "seedance2.0_vip",
+    "seedance2.0fast_vip",
+    "seedance2.0mini",
+)
+IMAGE2VIDEO_MODELS = (
+    "seedance1.0fast",
+    "seedance1.0",
+    "seedance1.5pro",
+    *SEEDANCE2_VIDEO_MODELS,
+)
+FRAMES2VIDEO_MODELS = ("seedance1.5pro", *SEEDANCE2_VIDEO_MODELS)
+DEFAULT_VIDEO_RESOLUTIONS = ("720p",)
+SEEDANCE2_VIP_RESOLUTIONS = ("720p", "1080p", "4k")
 IMAGE2VIDEO_MODEL_ALIASES = {
-    "3.0_fast": "3.0fast",
-    "3.0_pro": "3.0pro",
-    "3.5_pro": "3.5pro",
+    "3.0": "seedance1.0",
+    "3.0fast": "seedance1.0fast",
+    "3.0_fast": "seedance1.0fast",
+    "3.5pro": "seedance1.5pro",
+    "3.5_pro": "seedance1.5pro",
 }
 
 
@@ -295,6 +315,7 @@ def validate_text2image(namespace: argparse.Namespace) -> None:
         "4.1",
         "4.5",
         "4.6",
+        "4.7",
         "5.0",
     }:
         raise DreaminaWrapperError("resolution_type=4k only supports 4.x or 5.0.")
@@ -310,16 +331,7 @@ def validate_image2video(namespace: argparse.Namespace) -> None:
     if namespace.model_version:
         namespace.model_version = IMAGE2VIDEO_MODEL_ALIASES.get(namespace.model_version, namespace.model_version)
 
-    if namespace.model_version and namespace.model_version not in {
-        "3.0",
-        "3.0fast",
-        "3.0pro",
-        "3.5pro",
-        "seedance2.0",
-        "seedance2.0fast",
-        "seedance2.0_vip",
-        "seedance2.0fast_vip",
-    }:
+    if namespace.model_version and namespace.model_version not in IMAGE2VIDEO_MODELS:
         raise DreaminaWrapperError(
             f"Unsupported image2video model_version: {namespace.model_version}"
         )
@@ -336,23 +348,23 @@ def validate_image2video(namespace: argparse.Namespace) -> None:
     if not namespace.model_version:
         return
 
-    if namespace.model_version in {"3.0", "3.0fast", "3.0pro"}:
+    if namespace.model_version in {"seedance1.0fast", "seedance1.0"}:
         validate_integer_in_range(namespace.duration, 3, 10, "duration")
-        validate_choice(namespace.video_resolution, {"720p"}, "video_resolution")
+        validate_choice(namespace.video_resolution, DEFAULT_VIDEO_RESOLUTIONS, "video_resolution")
         return
 
-    if namespace.model_version == "3.5pro":
+    if namespace.model_version == "seedance1.5pro":
         validate_integer_in_range(namespace.duration, 4, 12, "duration")
-        validate_choice(namespace.video_resolution, {"720p"}, "video_resolution")
+        validate_choice(namespace.video_resolution, DEFAULT_VIDEO_RESOLUTIONS, "video_resolution")
         return
 
     if namespace.model_version == "seedance2.0_vip":
         validate_integer_in_range(namespace.duration, 4, 15, "duration")
-        validate_choice(namespace.video_resolution, {"720p", "1080p"}, "video_resolution")
+        validate_choice(namespace.video_resolution, SEEDANCE2_VIP_RESOLUTIONS, "video_resolution")
         return
 
     validate_integer_in_range(namespace.duration, 4, 15, "duration")
-    validate_choice(namespace.video_resolution, {"720p"}, "video_resolution")
+    validate_choice(namespace.video_resolution, DEFAULT_VIDEO_RESOLUTIONS, "video_resolution")
 
 
 def validate_text2video(namespace: argparse.Namespace) -> None:
@@ -360,32 +372,27 @@ def validate_text2video(namespace: argparse.Namespace) -> None:
     validate_integer_in_range(namespace.duration, 4, 15, "duration")
     validate_choice(
         namespace.video_resolution,
-        {"720p", "1080p"} if effective_model == "seedance2.0_vip" else {"720p"},
+        SEEDANCE2_VIP_RESOLUTIONS if effective_model == "seedance2.0_vip" else DEFAULT_VIDEO_RESOLUTIONS,
         "video_resolution",
     )
 
 
 def validate_frames2video(namespace: argparse.Namespace) -> None:
-    effective_model = namespace.model_version or "seedance2.0fast"
+    effective_model = namespace.model_version or "seedance2.0_vip"
     namespace.effective_model_version = effective_model
 
-    if effective_model == "3.0":
-        validate_integer_in_range(namespace.duration, 3, 10, "duration")
-        validate_choice(namespace.video_resolution, {"720p"}, "video_resolution")
-        return
-
-    if effective_model == "3.5pro":
+    if effective_model == "seedance1.5pro":
         validate_integer_in_range(namespace.duration, 4, 12, "duration")
-        validate_choice(namespace.video_resolution, {"720p"}, "video_resolution")
+        validate_choice(namespace.video_resolution, DEFAULT_VIDEO_RESOLUTIONS, "video_resolution")
         return
 
     if effective_model == "seedance2.0_vip":
         validate_integer_in_range(namespace.duration, 4, 15, "duration")
-        validate_choice(namespace.video_resolution, {"720p", "1080p"}, "video_resolution")
+        validate_choice(namespace.video_resolution, SEEDANCE2_VIP_RESOLUTIONS, "video_resolution")
         return
 
     validate_integer_in_range(namespace.duration, 4, 15, "duration")
-    validate_choice(namespace.video_resolution, {"720p"}, "video_resolution")
+    validate_choice(namespace.video_resolution, DEFAULT_VIDEO_RESOLUTIONS, "video_resolution")
 
 
 def validate_multiframe2video(namespace: argparse.Namespace) -> None:
@@ -456,7 +463,7 @@ def validate_multimodal2video(namespace: argparse.Namespace) -> None:
     effective_model = namespace.model_version or "seedance2.0fast"
     validate_choice(
         namespace.video_resolution,
-        {"720p", "1080p"} if effective_model == "seedance2.0_vip" else {"720p"},
+        SEEDANCE2_VIP_RESOLUTIONS if effective_model == "seedance2.0_vip" else DEFAULT_VIDEO_RESOLUTIONS,
         "video_resolution",
     )
 
@@ -487,12 +494,12 @@ def validate_float_in_range(
         raise DreaminaWrapperError(f"{name} must be between {minimum} and {maximum}.")
 
 
-def validate_choice(value: str | None, allowed: set[str], name: str) -> None:
+def validate_choice(value: str | None, allowed: Sequence[str] | set[str], name: str) -> None:
     if value is None:
         return
 
     if value not in allowed:
-        allowed_text = ", ".join(sorted(allowed))
+        allowed_text = ", ".join(allowed if isinstance(allowed, tuple) else sorted(allowed))
         raise DreaminaWrapperError(f"{name} must be one of: {allowed_text}.")
 
 
@@ -520,8 +527,9 @@ COMMAND_SPECS: dict[str, CommandSpec] = {
                 "model_version",
                 "model_version",
                 "Model version.",
-                choices=("3.0", "3.1", "4.0", "4.1", "4.5", "4.6", "5.0"),
+                choices=TEXT2IMAGE_MODELS,
             ),
+            ParameterSpec("generate_num", "generate_num", "Number of images to generate.", value_type="int", min_value=1, max_value=10),
             SESSION_PARAMETER,
             ParameterSpec("poll", "poll", "Optional polling window in seconds.", value_type="int", min_value=0),
         ),
@@ -553,8 +561,9 @@ COMMAND_SPECS: dict[str, CommandSpec] = {
                 "model_version",
                 "model_version",
                 "Model version.",
-                choices=("4.0", "4.1", "4.5", "4.6", "5.0"),
+                choices=IMAGE2IMAGE_MODELS,
             ),
+            ParameterSpec("generate_num", "generate_num", "Number of images to generate.", value_type="int", min_value=1, max_value=10),
             SESSION_PARAMETER,
             ParameterSpec("poll", "poll", "Optional polling window in seconds.", value_type="int", min_value=0),
         ),
@@ -599,13 +608,13 @@ COMMAND_SPECS: dict[str, CommandSpec] = {
                 "video_resolution",
                 "video_resolution",
                 "Video resolution.",
-                choices=("720p", "1080p"),
+                choices=SEEDANCE2_VIP_RESOLUTIONS,
             ),
             ParameterSpec(
                 "model_version",
                 "model_version",
                 "Model version.",
-                choices=("seedance2.0", "seedance2.0fast", "seedance2.0_vip", "seedance2.0fast_vip"),
+                choices=SEEDANCE2_VIDEO_MODELS,
             ),
             SESSION_PARAMETER,
             ParameterSpec("poll", "poll", "Optional polling window in seconds.", value_type="int", min_value=0),
@@ -645,7 +654,7 @@ COMMAND_SPECS: dict[str, CommandSpec] = {
                 "model_version",
                 "model_version",
                 "Model version.",
-                choices=("3.0", "3.5pro", "seedance2.0", "seedance2.0fast", "seedance2.0_vip", "seedance2.0fast_vip"),
+                choices=FRAMES2VIDEO_MODELS,
             ),
             ParameterSpec("duration", "duration", "Video duration in seconds.", value_type="int"),
             ParameterSpec("video_resolution", "video_resolution", "Video resolution override."),
@@ -692,12 +701,12 @@ COMMAND_SPECS: dict[str, CommandSpec] = {
                 "Output aspect ratio.",
                 choices=("1:1", "3:4", "16:9", "4:3", "9:16", "21:9"),
             ),
-            ParameterSpec("video_resolution", "video_resolution", "Video resolution.", choices=("720p", "1080p")),
+            ParameterSpec("video_resolution", "video_resolution", "Video resolution.", choices=SEEDANCE2_VIP_RESOLUTIONS),
             ParameterSpec(
                 "model_version",
                 "model_version",
                 "Model version.",
-                choices=("seedance2.0", "seedance2.0fast", "seedance2.0_vip", "seedance2.0fast_vip"),
+                choices=SEEDANCE2_VIDEO_MODELS,
             ),
             SESSION_PARAMETER,
             ParameterSpec("poll", "poll", "Optional polling window in seconds.", value_type="int", min_value=0),

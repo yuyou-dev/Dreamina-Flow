@@ -124,6 +124,7 @@ npm run audit:cli-help
 
 - 当前仓库定位为本地开源源码仓库，不包含远程部署、账号托管或云端服务。
 - 登录、积分、设备授权信息和运行状态都通过本地 Dreamina CLI 驱动。
+- Dreamina CLI 参数对齐细节见 [docs/dreamina-cli-alignment.md](docs/dreamina-cli-alignment.md)。
 - 更多实现细节可继续参考 [docs/technical-overview.md](docs/technical-overview.md) 与 [docs/workflow-json-format.md](docs/workflow-json-format.md)。
 - 贡献方式请参考 [CONTRIBUTING.md](CONTRIBUTING.md)。
 

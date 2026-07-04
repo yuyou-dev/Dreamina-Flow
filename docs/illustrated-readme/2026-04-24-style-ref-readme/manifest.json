@@ -12,12 +12,14 @@
     "在浏览器工作台中编辑、连接、运行 workflow，并查看结果回写。",
     "支持导入导出 `.workflow.json`，格式对齐 `workflow.document/v1alpha1`。",
     "内置 starter workflow 与示例 workflow，便于本地快速验证。",
-    "登录流已切到 OAuth Device Flow，登录成功后会恢复被阻塞的动作。"
+    "登录流已切到 OAuth Device Flow，登录成功后会恢复被阻塞的动作。",
+    "Dreamina CLI 参数面对齐当前 `dreamina -h`：图片批量 `generate_num`、Seedance 1.x/2.0 mini，以及 `seedance2.0_vip` 的 `4k` 视频都已进入 adapter 校验。"
   ],
   "facts_sources": [
     "README.md",
     "docs/technical-overview.md",
     "docs/workflow-json-format.md",
+    "docs/dreamina-cli-alignment.md",
     "docs/comic-project-intro/style-pack.md",
     "package.json",
     "apps/studio-api/package.json",
@@ -112,6 +114,7 @@
   ],
   "footer_notes": [
     "当前仓库定位为本地开源源码仓库，不包含远程部署、账号托管或云端服务。",
+    "Dreamina CLI 参数对齐细节见 `docs/dreamina-cli-alignment.md`。",
     "更多实现细节可继续参考 `docs/technical-overview.md` 与 `docs/workflow-json-format.md`。",
     "如果后续确认这版 README 方向合适，再决定是否覆盖仓库根目录 `README.md`。"
   ]

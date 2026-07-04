@@ -170,11 +170,14 @@ assertAllContain(generatorCommands, "--session", "--session");
 assertAllContain(generatorCommands, "--poll", "--poll");
 
 assertNotContains("text2image", "lab", text2image, "lab");
-assertContains("text2image", "4.0, 4.1, 4.5, 4.6, 5.0", text2image, "4.x/5.x models");
+assertContains("text2image", "4.0, 4.1, 4.5, 4.6, 4.7, 5.0", text2image, "4.x/5.x models");
+assertContains("text2image", "--generate_num", text2image, "--generate_num");
 assertContains("text2image", "omit --model_version to use the default model", text2image, "default model note");
 
 assertNotContains("image2image", "lab", image2image, "lab");
 assertContains("image2image", "1 to 10", image2image, "1 to 10");
+assertContains("image2image", "--generate_num", image2image, "--generate_num");
+assertContains("image2image", "4.0, 4.1, 4.5, 4.6, 4.7, 5.0", image2image, "4.x/5.x models");
 assertContains("image_upscale", "4k and 8k require VIP", imageUpscale, "4k and 8k require VIP");
 
 assertContains("login", "--headless", login, "--headless");
@@ -211,14 +214,25 @@ assertContains("session_delete", "soft delete", sessionDelete, "soft delete");
 
 assertContains("user_credit", "remaining Dreamina credits", userCredit, "remaining Dreamina credits");
 assertContains("text2video", "seedance2.0fast", text2video, "seedance2.0fast");
-assertContains("frames2video", "seedance2.0fast", frames2video, "seedance2.0fast");
+assertContains("text2video", "seedance2.0mini", text2video, "seedance2.0mini");
+assertContains("text2video", "4k", text2video, "4k");
+assertContains("frames2video", "seedance1.5pro", frames2video, "seedance1.5pro");
+assertContains("frames2video", "default model_version: seedance2.0_vip", frames2video, "frames2video default model");
+assertContains("frames2video", "4k", frames2video, "4k");
 assertContains("multiframe2video", "default each segment to 3", multiframe2video, "default each segment to 3");
 assertContains("multimodal2video", "formerly known as ref2video", multimodal2video, "formerly known as ref2video");
 assertContains("multimodal2video", "image<=9, video<=3, audio<=3", multimodal2video, "input limits");
+assertContains("multimodal2video", "seedance2.0mini", multimodal2video, "seedance2.0mini");
+assertContains("multimodal2video", "4k", multimodal2video, "4k");
 assertContains("image2video", "advanced controls", image2video, "advanced controls");
-assertContains("image2video", "3.0_fast", image2video, "3.0_fast");
-assertContains("image2video", "3.0_pro", image2video, "3.0_pro");
-assertContains("image2video", "3.5_pro", image2video, "3.5_pro");
+assertContains("image2video", "seedance1.0fast", image2video, "seedance1.0fast");
+assertContains("image2video", "seedance1.0", image2video, "seedance1.0");
+assertContains("image2video", "seedance1.5pro", image2video, "seedance1.5pro");
+assertContains("image2video", "seedance2.0mini", image2video, "seedance2.0mini");
+assertContains("image2video", "4k", image2video, "4k");
+assertNotContains("image2video", "3.0fast", image2video, "old 3.0fast model");
+assertNotContains("image2video", "3.0pro", image2video, "old 3.0pro model");
+assertNotContains("image2video", "3.5pro", image2video, "old 3.5pro model");
 
 if (failures.length === 0) {
   console.log(`cli help audit passed (${commands.length} commands checked)`);

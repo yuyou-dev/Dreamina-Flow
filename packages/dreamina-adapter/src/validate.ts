@@ -1,6 +1,9 @@
 import type { NodeDefinition, ResolvedInputValue, ValidationResult } from "@workflow-studio/workflow-core";
 import { isProcessorNode } from "./catalog.js";
 
+const defaultVideoResolutions = ["720p"];
+const seedance2VipResolutions = ["720p", "1080p", "4k"];
+
 function readAliases(node: NodeDefinition): Record<string, string> {
   const aliases = node.constraints.aliases;
   if (!aliases || typeof aliases !== "object" || Array.isArray(aliases)) {
@@ -50,16 +53,27 @@ function validateImage2Video(normalized: Record<string, unknown>, errors: string
     return;
   }
   const rules: Record<string, { min: number; max: number; resolutions: string[] }> = {
-    "3.0": { min: 3, max: 10, resolutions: ["720p"] },
-    "3.0fast": { min: 3, max: 10, resolutions: ["720p"] },
-    "3.0pro": { min: 3, max: 10, resolutions: ["720p"] },
-    "3.5pro": { min: 4, max: 12, resolutions: ["720p"] },
-    "seedance2.0": { min: 4, max: 15, resolutions: ["720p"] },
-    "seedance2.0fast": { min: 4, max: 15, resolutions: ["720p"] },
-    "seedance2.0_vip": { min: 4, max: 15, resolutions: ["720p", "1080p"] },
-    "seedance2.0fast_vip": { min: 4, max: 15, resolutions: ["720p"] },
+    "seedance1.0fast": { min: 3, max: 10, resolutions: defaultVideoResolutions },
+    "seedance1.0": { min: 3, max: 10, resolutions: defaultVideoResolutions },
+    "seedance1.5pro": { min: 4, max: 12, resolutions: defaultVideoResolutions },
+    "seedance2.0": { min: 4, max: 15, resolutions: defaultVideoResolutions },
+    "seedance2.0fast": { min: 4, max: 15, resolutions: defaultVideoResolutions },
+    "seedance2.0_vip": { min: 4, max: 15, resolutions: seedance2VipResolutions },
+    "seedance2.0fast_vip": { min: 4, max: 15, resolutions: defaultVideoResolutions },
+    "seedance2.0mini": { min: 4, max: 15, resolutions: defaultVideoResolutions },
   };
-  const normalizedModel = ({ "3.0_fast": "3.0fast", "3.0_pro": "3.0pro", "3.5_pro": "3.5pro" } as Record<string, string>)[modelVersion] ?? modelVersion;
+  const normalizedModel = (
+    {
+      "3.0": "seedance1.0",
+      "3.0fast": "seedance1.0fast",
+      "3.0_fast": "seedance1.0fast",
+      "3.5pro": "seedance1.5pro",
+      "3.5_pro": "seedance1.5pro",
+    } as Record<string, string>
+  )[modelVersion] ?? modelVersion;
+  if (normalizedModel !== modelVersion) {
+    normalized.model_version = normalizedModel;
+  }
   const rule = rules[normalizedModel];
   if (!rule) {
     errors.push(`Unsupported image2video model_version: ${modelVersion}.`);
@@ -72,16 +86,16 @@ function validateImage2Video(normalized: Record<string, unknown>, errors: string
 }
 
 function validateFrames2Video(normalized: Record<string, unknown>, errors: string[]): void {
-  const modelVersion = String(normalized.model_version ?? "seedance2.0fast");
+  const modelVersion = String(normalized.model_version ?? "seedance2.0_vip");
   const duration = normalized.duration !== undefined ? Number(normalized.duration) : undefined;
   const videoResolution = normalized.video_resolution ? String(normalized.video_resolution) : undefined;
   const rules: Record<string, { min: number; max: number; resolutions: string[] }> = {
-    "3.0": { min: 3, max: 10, resolutions: ["720p"] },
-    "3.5pro": { min: 4, max: 12, resolutions: ["720p"] },
-    "seedance2.0": { min: 4, max: 15, resolutions: ["720p"] },
-    "seedance2.0fast": { min: 4, max: 15, resolutions: ["720p"] },
-    "seedance2.0_vip": { min: 4, max: 15, resolutions: ["720p", "1080p"] },
-    "seedance2.0fast_vip": { min: 4, max: 15, resolutions: ["720p"] },
+    "seedance1.5pro": { min: 4, max: 12, resolutions: defaultVideoResolutions },
+    "seedance2.0": { min: 4, max: 15, resolutions: defaultVideoResolutions },
+    "seedance2.0fast": { min: 4, max: 15, resolutions: defaultVideoResolutions },
+    "seedance2.0_vip": { min: 4, max: 15, resolutions: seedance2VipResolutions },
+    "seedance2.0fast_vip": { min: 4, max: 15, resolutions: defaultVideoResolutions },
+    "seedance2.0mini": { min: 4, max: 15, resolutions: defaultVideoResolutions },
   };
   const rule = rules[modelVersion];
   if (!rule) {
@@ -103,10 +117,11 @@ function validateSeedance2VideoControls(
   const duration = normalized.duration !== undefined ? Number(normalized.duration) : undefined;
   const videoResolution = normalized.video_resolution ? String(normalized.video_resolution) : undefined;
   const rules: Record<string, { min: number; max: number; resolutions: string[] }> = {
-    "seedance2.0": { min: 4, max: 15, resolutions: ["720p"] },
-    "seedance2.0fast": { min: 4, max: 15, resolutions: ["720p"] },
-    "seedance2.0_vip": { min: 4, max: 15, resolutions: ["720p", "1080p"] },
-    "seedance2.0fast_vip": { min: 4, max: 15, resolutions: ["720p"] },
+    "seedance2.0": { min: 4, max: 15, resolutions: defaultVideoResolutions },
+    "seedance2.0fast": { min: 4, max: 15, resolutions: defaultVideoResolutions },
+    "seedance2.0_vip": { min: 4, max: 15, resolutions: seedance2VipResolutions },
+    "seedance2.0fast_vip": { min: 4, max: 15, resolutions: defaultVideoResolutions },
+    "seedance2.0mini": { min: 4, max: 15, resolutions: defaultVideoResolutions },
   };
   const rule = rules[modelVersion];
   if (!rule) {
@@ -196,7 +211,7 @@ function validateText2Image(normalized: Record<string, unknown>, errors: string[
   if (resolutionType === "1k" && !["3.0", "3.1"].includes(modelVersion)) {
     errors.push("text2image resolution_type=1k requires model_version 3.0 or 3.1.");
   }
-  if (resolutionType === "4k" && modelVersion && !["4.0", "4.1", "4.5", "4.6", "5.0"].includes(modelVersion)) {
+  if (resolutionType === "4k" && modelVersion && !["4.0", "4.1", "4.5", "4.6", "4.7", "5.0"].includes(modelVersion)) {
     errors.push("text2image resolution_type=4k only supports 4.x or 5.0.");
   }
 }

@@ -38,9 +38,12 @@
 补充说明：
 
 - 8 个生成命令都会把可选 `session` 参数透传给 Dreamina CLI
+- 图片生成节点已支持 `generate_num` 1-10；视频节点使用当前 Seedance 1.x / Seedance 2.0 命名，不再把旧 3.x 视频模型名作为新示例
+- `seedance2.0mini` 已进入文本、图片、首尾帧和全能参考视频校验；`seedance2.0_vip` 可选择 `720p`、`1080p` 或 `4k`
 - 对 CLI 明确支持“留空即走默认值”的模型/分辨率参数，catalog 会保留为空而不是预先填死
 - 登录会话现在走 OAuth Device Flow：先执行 `dreamina login --headless` / `dreamina relogin --headless`，再用 `dreamina login checklogin --device_code=...` 轮询完成授权
-- `list_task`、`session` 管理子命令目前只记录在本地 CLI 对齐文档中，不暴露到 API / UI
+- 当前 Dreamina CLI 参数面记录在 [Dreamina CLI Alignment](dreamina-cli-alignment.md)，`npm run audit:cli-help` 负责检查本机 CLI help 是否继续满足这些关键事实
+- `list_task`、`session` 管理子命令目前只记录在 CLI 对齐文档中，不暴露到 API / UI
 
 ## API
 

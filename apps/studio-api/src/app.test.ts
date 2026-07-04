@@ -10,18 +10,20 @@ const text2image: NodeDefinition = {
   outputs: [{ id: "image", label: "Image", type: "image" }],
   params: [
     { key: "ratio", label: "Ratio", type: "select", choices: ["1:1", "16:9"], default: "1:1" },
-    { key: "resolution_type", label: "Resolution", type: "select", choices: ["1k", "2k"], default: "2k" },
-    { key: "model_version", label: "Model", type: "select", choices: ["3.0", "3.1"], default: "3.1" },
+    { key: "resolution_type", label: "Resolution", type: "select", choices: ["1k", "2k", "4k"], default: "2k" },
+    { key: "model_version", label: "Model", type: "select", choices: ["3.0", "3.1", "4.7", "5.0"], default: "3.1" },
+    { key: "generate_num", label: "Generate Count", type: "number", min: 1, max: 10, default: 1 },
     { key: "poll", label: "Poll", type: "number", default: 300 },
   ],
-  defaults: { ratio: "1:1", resolution_type: "2k", model_version: "3.1", poll: 300 },
+  defaults: { ratio: "1:1", resolution_type: "2k", model_version: "3.1", generate_num: 1, poll: 300 },
   outputMode: "json",
   wrapperAvailable: true,
   rawCliAvailable: true,
   constraints: {
     resolutionRules: {
       "1k": ["3.0", "3.1"],
-      "2k": ["3.0", "3.1"],
+      "2k": ["3.0", "3.1", "4.7", "5.0"],
+      "4k": ["4.7", "5.0"],
     },
   },
   warnings: [],
@@ -203,6 +205,11 @@ describe("studio-api", () => {
       ]);
 
       expect(capabilities.canvasNodes.processor).toHaveLength(1);
+      expect(capabilities.canvasNodes.processor[0].params.find((param: { key: string }) => param.key === "generate_num")).toMatchObject({
+        min: 1,
+        max: 10,
+      });
+      expect(capabilities.canvasNodes.processor[0].params.find((param: { key: string }) => param.key === "model_version")?.choices).toContain("4.7");
       expect(status.adapterName).toBe("dreamina");
       expect(status.auth.loggedIn).toBe(true);
       expect(status.auth.credits.totalCredit).toBe(500737);

@@ -30,21 +30,24 @@ interface ProcessorNodeTemplate {
 
 const ratioChoices = ["21:9", "16:9", "3:2", "4:3", "1:1", "3:4", "2:3", "9:16"];
 const videoRatioChoices = ["1:1", "3:4", "16:9", "4:3", "9:16", "21:9"];
+const defaultVideoResolutions = ["720p"];
+const seedance2VipResolutions = ["720p", "1080p", "4k"];
 
 const processorTemplates: Record<string, ProcessorNodeTemplate> = {
   text2image: {
     title: "Text to Image",
     inputs: [{ id: "prompt", label: "Prompt", type: "text", required: true }],
     outputs: [{ id: "image", label: "Image", type: "image" }],
-    defaults: { ratio: "16:9", poll: getDefaultPollSeconds("text2image") },
+    defaults: { ratio: "16:9", generate_num: 1, poll: getDefaultPollSeconds("text2image") },
     warnings: ["1k only works with model 3.0 or 3.1.", "4k is limited to 4.x or 5.0."],
     constraints: {
       supportedRatios: ratioChoices,
       resolutionRules: {
         "1k": ["3.0", "3.1"],
-        "2k": ["3.0", "3.1", "4.0", "4.1", "4.5", "4.6", "5.0"],
-        "4k": ["4.0", "4.1", "4.5", "4.6", "5.0"],
+        "2k": ["3.0", "3.1", "4.0", "4.1", "4.5", "4.6", "4.7", "5.0"],
+        "4k": ["4.0", "4.1", "4.5", "4.6", "4.7", "5.0"],
       },
+      generateNumRange: [1, 10],
     },
   },
   image2image: {
@@ -54,9 +57,9 @@ const processorTemplates: Record<string, ProcessorNodeTemplate> = {
       { id: "prompt", label: "Prompt", type: "text", required: false },
     ],
     outputs: [{ id: "image", label: "Image", type: "image" }],
-    defaults: { ratio: "16:9", poll: getDefaultPollSeconds("image2image") },
+    defaults: { ratio: "16:9", generate_num: 1, poll: getDefaultPollSeconds("image2image") },
     warnings: [],
-    constraints: { supportedRatios: ratioChoices, imageRange: [1, 10] },
+    constraints: { supportedRatios: ratioChoices, imageRange: [1, 10], generateNumRange: [1, 10] },
   },
   image_upscale: {
     title: "Image Upscale",
@@ -75,10 +78,11 @@ const processorTemplates: Record<string, ProcessorNodeTemplate> = {
     constraints: {
       supportedRatios: videoRatioChoices,
       modelRules: {
-        "seedance2.0": { duration: [4, 15], video_resolution: ["720p"] },
-        "seedance2.0fast": { duration: [4, 15], video_resolution: ["720p"] },
-        "seedance2.0_vip": { duration: [4, 15], video_resolution: ["720p", "1080p"] },
-        "seedance2.0fast_vip": { duration: [4, 15], video_resolution: ["720p"] },
+        "seedance2.0": { duration: [4, 15], video_resolution: defaultVideoResolutions },
+        "seedance2.0fast": { duration: [4, 15], video_resolution: defaultVideoResolutions },
+        "seedance2.0_vip": { duration: [4, 15], video_resolution: seedance2VipResolutions },
+        "seedance2.0fast_vip": { duration: [4, 15], video_resolution: defaultVideoResolutions },
+        "seedance2.0mini": { duration: [4, 15], video_resolution: defaultVideoResolutions },
       },
     },
   },
@@ -96,19 +100,21 @@ const processorTemplates: Record<string, ProcessorNodeTemplate> = {
     ],
     constraints: {
       modelRules: {
-        "3.0": { duration: [3, 10], video_resolution: ["720p"] },
-        "3.0fast": { duration: [3, 10], video_resolution: ["720p"] },
-        "3.0pro": { duration: [3, 10], video_resolution: ["720p"] },
-        "3.5pro": { duration: [4, 12], video_resolution: ["720p"] },
-        "seedance2.0": { duration: [4, 15], video_resolution: ["720p"] },
-        "seedance2.0fast": { duration: [4, 15], video_resolution: ["720p"] },
-        "seedance2.0_vip": { duration: [4, 15], video_resolution: ["720p", "1080p"] },
-        "seedance2.0fast_vip": { duration: [4, 15], video_resolution: ["720p"] },
+        "seedance1.0fast": { duration: [3, 10], video_resolution: defaultVideoResolutions },
+        "seedance1.0": { duration: [3, 10], video_resolution: defaultVideoResolutions },
+        "seedance1.5pro": { duration: [4, 12], video_resolution: defaultVideoResolutions },
+        "seedance2.0": { duration: [4, 15], video_resolution: defaultVideoResolutions },
+        "seedance2.0fast": { duration: [4, 15], video_resolution: defaultVideoResolutions },
+        "seedance2.0_vip": { duration: [4, 15], video_resolution: seedance2VipResolutions },
+        "seedance2.0fast_vip": { duration: [4, 15], video_resolution: defaultVideoResolutions },
+        "seedance2.0mini": { duration: [4, 15], video_resolution: defaultVideoResolutions },
       },
       aliases: {
-        "3.0_fast": "3.0fast",
-        "3.0_pro": "3.0pro",
-        "3.5_pro": "3.5pro",
+        "3.0": "seedance1.0",
+        "3.0fast": "seedance1.0fast",
+        "3.0_fast": "seedance1.0fast",
+        "3.5pro": "seedance1.5pro",
+        "3.5_pro": "seedance1.5pro",
       },
       inferredFields: ["ratio"],
       requiresModelForAdvancedControls: true,
@@ -122,16 +128,16 @@ const processorTemplates: Record<string, ProcessorNodeTemplate> = {
       { id: "prompt", label: "Prompt", type: "text", required: true },
     ],
     outputs: [{ id: "video", label: "Video", type: "video" }],
-    defaults: { duration: 5, model_version: "seedance2.0fast", poll: getDefaultPollSeconds("frames2video") },
+    defaults: { duration: 5, model_version: "seedance2.0_vip", poll: getDefaultPollSeconds("frames2video") },
     warnings: ["Ratio is inferred from the first frame image."],
     constraints: {
       modelRules: {
-        "3.0": { duration: [3, 10], video_resolution: ["720p"] },
-        "3.5pro": { duration: [4, 12], video_resolution: ["720p"] },
-        "seedance2.0": { duration: [4, 15], video_resolution: ["720p"] },
-        "seedance2.0fast": { duration: [4, 15], video_resolution: ["720p"] },
-        "seedance2.0_vip": { duration: [4, 15], video_resolution: ["720p", "1080p"] },
-        "seedance2.0fast_vip": { duration: [4, 15], video_resolution: ["720p"] },
+        "seedance1.5pro": { duration: [4, 12], video_resolution: defaultVideoResolutions },
+        "seedance2.0": { duration: [4, 15], video_resolution: defaultVideoResolutions },
+        "seedance2.0fast": { duration: [4, 15], video_resolution: defaultVideoResolutions },
+        "seedance2.0_vip": { duration: [4, 15], video_resolution: seedance2VipResolutions },
+        "seedance2.0fast_vip": { duration: [4, 15], video_resolution: defaultVideoResolutions },
+        "seedance2.0mini": { duration: [4, 15], video_resolution: defaultVideoResolutions },
       },
       inferredFields: ["ratio"],
     },
@@ -172,10 +178,11 @@ const processorTemplates: Record<string, ProcessorNodeTemplate> = {
     constraints: {
       supportedRatios: videoRatioChoices,
       modelRules: {
-        "seedance2.0": { duration: [4, 15], video_resolution: ["720p"] },
-        "seedance2.0fast": { duration: [4, 15], video_resolution: ["720p"] },
-        "seedance2.0_vip": { duration: [4, 15], video_resolution: ["720p", "1080p"] },
-        "seedance2.0fast_vip": { duration: [4, 15], video_resolution: ["720p"] },
+        "seedance2.0": { duration: [4, 15], video_resolution: defaultVideoResolutions },
+        "seedance2.0fast": { duration: [4, 15], video_resolution: defaultVideoResolutions },
+        "seedance2.0_vip": { duration: [4, 15], video_resolution: seedance2VipResolutions },
+        "seedance2.0fast_vip": { duration: [4, 15], video_resolution: defaultVideoResolutions },
+        "seedance2.0mini": { duration: [4, 15], video_resolution: defaultVideoResolutions },
       },
       maxInputs: { image: 9, video: 3, audio: 3 },
     },
@@ -187,6 +194,7 @@ const parameterLabels: Record<string, string> = {
   ratio: "Ratio",
   resolution_type: "Resolution",
   model_version: "Model",
+  generate_num: "Generate Count",
   poll: "Poll (s)",
   images: "Images",
   image: "Image",
@@ -235,7 +243,7 @@ function unionModelRuleChoices(template: ProcessorNodeTemplate, key: "video_reso
   Object.values(template.constraints.modelRules as Record<string, { video_resolution?: string[] }>).forEach((rule) => {
     (rule.video_resolution ?? []).forEach((choice) => values.add(choice));
   });
-  const preferredOrder = ["720p", "1080p"];
+  const preferredOrder = ["720p", "1080p", "4k"];
   return preferredOrder.filter((choice) => values.has(choice));
 }
 

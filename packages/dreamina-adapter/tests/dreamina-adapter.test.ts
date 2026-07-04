@@ -14,8 +14,9 @@ const wrapperCommands = [
     parameters: [
       { key: "prompt", multiple: false, required: true, value_type: "string", choices: [], min_value: null, max_value: null, path_mode: null },
       { key: "ratio", multiple: false, required: false, value_type: "string", choices: ["1:1", "16:9"], min_value: null, max_value: null, path_mode: null },
-      { key: "resolution_type", multiple: false, required: false, value_type: "string", choices: ["1k", "2k"], min_value: null, max_value: null, path_mode: null },
-      { key: "model_version", multiple: false, required: false, value_type: "string", choices: ["3.0", "3.1"], min_value: null, max_value: null, path_mode: null },
+      { key: "resolution_type", multiple: false, required: false, value_type: "string", choices: ["1k", "2k", "4k"], min_value: null, max_value: null, path_mode: null },
+      { key: "model_version", multiple: false, required: false, value_type: "string", choices: ["3.0", "3.1", "4.7", "5.0"], min_value: null, max_value: null, path_mode: null },
+      { key: "generate_num", multiple: false, required: false, value_type: "int", choices: [], min_value: 1, max_value: 10, path_mode: null },
       { key: "session", multiple: false, required: false, value_type: "int", choices: [], min_value: 0, max_value: null, path_mode: null },
       { key: "poll", multiple: false, required: false, value_type: "int", choices: [], min_value: 1, max_value: 1800, path_mode: null },
     ],
@@ -80,7 +81,28 @@ describe("dreamina-adapter", () => {
     expect(result.errors).toContain("Session must be >= 0.");
   });
 
-  it("accepts aliased image2video model values and normalizes them before select validation", () => {
+  it("validates image batch generate_num ranges from wrapper capabilities", () => {
+    const processor = buildProcessorDefinitions(wrapperCommands, { text2image: "help" })[0];
+    expect(processor).toBeDefined();
+    if (!processor) {
+      return;
+    }
+
+    const result = validateNodeRun(
+      processor,
+      {
+        generate_num: 11,
+      },
+      {
+        prompt: [{ kind: "text", text: "A studio photograph of a silver ring." }],
+      },
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContain("Generate Count must be <= 10.");
+  });
+
+  it("accepts legacy image2video model values and normalizes them before select validation", () => {
     const image2videoProcessor = {
       name: "image2video",
       title: "Image to Video",
@@ -93,8 +115,8 @@ describe("dreamina-adapter", () => {
       outputs: [{ id: "video", label: "Video", type: "video" as const }],
       params: [
         { key: "duration", label: "Duration (s)", type: "number" as const },
-        { key: "video_resolution", label: "Resolution", type: "select" as const, choices: ["720p", "1080p"] },
-        { key: "model_version", label: "Model", type: "select" as const, choices: ["3.0", "3.0fast", "3.0pro", "3.5pro"] },
+        { key: "video_resolution", label: "Resolution", type: "select" as const, choices: ["720p", "1080p", "4k"] },
+        { key: "model_version", label: "Model", type: "select" as const, choices: ["seedance1.0fast", "seedance1.0", "seedance1.5pro"] },
       ],
       defaults: {},
       outputMode: "json",
@@ -102,9 +124,11 @@ describe("dreamina-adapter", () => {
       rawCliAvailable: true,
       constraints: {
         aliases: {
-          "3.0_fast": "3.0fast",
-          "3.0_pro": "3.0pro",
-          "3.5_pro": "3.5pro",
+          "3.0": "seedance1.0",
+          "3.0fast": "seedance1.0fast",
+          "3.0_fast": "seedance1.0fast",
+          "3.5pro": "seedance1.5pro",
+          "3.5_pro": "seedance1.5pro",
         },
       },
       warnings: [],
@@ -122,10 +146,10 @@ describe("dreamina-adapter", () => {
     );
 
     expect(result.ok).toBe(true);
-    expect(result.normalizedParams.model_version).toBe("3.0fast");
+    expect(result.normalizedParams.model_version).toBe("seedance1.0fast");
   });
 
-  it("validates updated Seedance 2.0 video resolution rules", () => {
+  it("validates updated Seedance 2.0 video resolution rules with mini and 4k support", () => {
     const text2videoProcessor = {
       name: "text2video",
       title: "Text to Video",
@@ -135,12 +159,12 @@ describe("dreamina-adapter", () => {
       outputs: [{ id: "video", label: "Video", type: "video" as const }],
       params: [
         { key: "duration", label: "Duration (s)", type: "number" as const },
-        { key: "video_resolution", label: "Resolution", type: "select" as const, choices: ["720p", "1080p"] },
+        { key: "video_resolution", label: "Resolution", type: "select" as const, choices: ["720p", "1080p", "4k"] },
         {
           key: "model_version",
           label: "Model",
           type: "select" as const,
-          choices: ["seedance2.0", "seedance2.0fast", "seedance2.0_vip", "seedance2.0fast_vip"],
+          choices: ["seedance2.0", "seedance2.0fast", "seedance2.0_vip", "seedance2.0fast_vip", "seedance2.0mini"],
         },
       ],
       defaults: {},
@@ -159,9 +183,17 @@ describe("dreamina-adapter", () => {
     expect(invalidFast.ok).toBe(false);
     expect(invalidFast.errors).toContain("text2video video_resolution must be one of: 720p.");
 
+    const invalidMini = validateNodeRun(
+      text2videoProcessor,
+      { model_version: "seedance2.0mini", video_resolution: "1080p", duration: 5 },
+      { prompt: [{ kind: "text", text: "A cinematic camera push." }] },
+    );
+    expect(invalidMini.ok).toBe(false);
+    expect(invalidMini.errors).toContain("text2video video_resolution must be one of: 720p.");
+
     const validVip = validateNodeRun(
       text2videoProcessor,
-      { model_version: "seedance2.0_vip", video_resolution: "1080p", duration: 5 },
+      { model_version: "seedance2.0_vip", video_resolution: "4k", duration: 5 },
       { prompt: [{ kind: "text", text: "A cinematic camera push." }] },
     );
     expect(validVip.ok).toBe(true);
@@ -180,12 +212,12 @@ describe("dreamina-adapter", () => {
       outputs: [{ id: "video", label: "Video", type: "video" as const }],
       params: [
         { key: "duration", label: "Duration (s)", type: "number" as const },
-        { key: "video_resolution", label: "Resolution", type: "select" as const, choices: ["720p", "1080p"] },
+        { key: "video_resolution", label: "Resolution", type: "select" as const, choices: ["720p", "1080p", "4k"] },
         {
           key: "model_version",
           label: "Model",
           type: "select" as const,
-          choices: ["3.0", "3.0fast", "3.0pro", "3.5pro", "seedance2.0_vip"],
+          choices: ["seedance1.0fast", "seedance1.0", "seedance1.5pro", "seedance2.0_vip", "seedance2.0mini"],
         },
       ],
       defaults: {},
@@ -198,7 +230,7 @@ describe("dreamina-adapter", () => {
 
     const invalidPro = validateNodeRun(
       image2videoProcessor,
-      { model_version: "3.5pro", video_resolution: "1080p", duration: 6 },
+      { model_version: "seedance1.5pro", video_resolution: "1080p", duration: 6 },
       {
         image: [{ kind: "image", localPath: "/tmp/first.png" }],
         prompt: [{ kind: "text", text: "Add a gentle push-in." }],
@@ -209,7 +241,7 @@ describe("dreamina-adapter", () => {
 
     const validVip = validateNodeRun(
       image2videoProcessor,
-      { model_version: "seedance2.0_vip", video_resolution: "1080p", duration: 6 },
+      { model_version: "seedance2.0_vip", video_resolution: "4k", duration: 6 },
       {
         image: [{ kind: "image", localPath: "/tmp/first.png" }],
         prompt: [{ kind: "text", text: "Add a gentle push-in." }],

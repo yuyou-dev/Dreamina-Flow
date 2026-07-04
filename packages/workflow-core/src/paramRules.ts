@@ -105,7 +105,7 @@ function unionModelRuleChoices(
   Object.values(modelRules).forEach((rule) => {
     (rule[key] ?? []).forEach((choice) => values.add(choice));
   });
-  const preferredOrder = ["720p", "1080p"];
+  const preferredOrder = ["720p", "1080p", "4k"];
   const ordered = preferredOrder.filter((choice) => values.has(choice));
   if (ordered.length > 0) {
     return ordered;
