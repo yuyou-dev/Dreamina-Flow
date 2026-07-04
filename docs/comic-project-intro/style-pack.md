@@ -5,8 +5,8 @@
 - Ratio: `16:9` for every final page
 - Language: Simplified Chinese
 - Mood: editorial comic board, playful technical walkthrough, clean but dense
-- Reference cues from `style-ref/style-reference.jpg`: oversized cobalt-blue typography, pale gray background, rounded white panels, collage layout, sticker-like callouts, halftone texture, bold subject in the foreground
-- Do not mimic the reference brand, logo, or characters directly
+- Repo-owned visual cues: oversized cobalt-blue typography, pale gray background, rounded white panels, collage layout, sticker-like callouts, halftone texture, bold subject in the foreground
+- Do not mimic outside brands, logos, or characters directly
 
 ## Characters
 

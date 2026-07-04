@@ -9,9 +9,9 @@
 
 - Language: Simplified Chinese
 - Ratio: `16:9` for every generated image
-- Style source: `style-ref/style-reference.jpg`
+- Style source: repo-owned blue-white technical collage system
 - Adapted cues: cobalt-blue oversized type, pale-gray paper texture, rounded white cards, sticker labels, halftone dots, black-outline arrows
-- Constraint: preserve repo facts; do not imitate the reference brand, logo, or characters
+- Constraint: preserve repo facts; do not imitate outside brands, logos, or characters
 
 ## Image Slots
 

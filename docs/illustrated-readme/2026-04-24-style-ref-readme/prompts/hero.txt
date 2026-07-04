@@ -2,7 +2,7 @@ $imagegen
 Use gpt-image-2 to create one polished README hero image for "Workflow Studio OSS".
 Aspect ratio: 16:9.
 Language: Simplified Chinese.
-Style: blue-and-white editorial collage inspired by the composition language of style-ref/style-reference.jpg, with oversized cobalt-blue typography, pale gray paper background, rounded white panels, sticker labels, halftone texture, and black-outline diagram details. Do not imitate the reference brand or characters.
+Style: repo-owned blue-and-white editorial collage with oversized cobalt-blue typography, pale gray paper background, rounded white panels, sticker labels, halftone texture, and black-outline diagram details. Do not imitate outside brands or characters.
 Purpose: top-of-README hero image that explains the project at a glance.
 Scene/backdrop: a workflow canvas on the right, a terminal bridge panel on the left, and connector arrows showing the studio driving Dreamina CLI execution.
 Grounded content only: packages/workflow-core, packages/dreamina-adapter, apps/studio-api, apps/studio-web, workflow canvas editing, import/export .workflow.json, local HTTP API, Dreamina CLI runtime.

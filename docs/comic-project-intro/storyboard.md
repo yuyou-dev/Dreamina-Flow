@@ -40,7 +40,7 @@
 ## Page 03
 
 - Goal: focus on the new Dreamina OAuth Device Flow login logic
-- Visual metaphor: a device-login control room with URL ticket, user code card, device code strip, and an auto-resume arrow back to the canvas
+- Visual metaphor: a device-login control room with verification URL ticket, user code card, device code strip, and an auto-resume arrow back to the canvas
 - Grounding facts:
   - adapter starts `dreamina login --headless` or `dreamina relogin --headless`
   - UI reads `verification_uri`, `user_code`, `device_code`
@@ -50,10 +50,10 @@
   - Title: `新的登录主线：OAuth Device Flow`
   - Subtitle: `README 现在可以直接从这里切入，因为 Studio 已经跟随新版 Dreamina CLI 调整登录逻辑。`
   - Step 1: `点击账户状态面板，发起 headless login / relogin。`
-  - Step 2: `界面展示 verification URL、user code、device code，不再只依赖二维码。`
+  - Step 2: `界面展示 verification URL、user code、device code，不再依赖旧 callback 或手动导入登录。`
   - Step 3: `adapter 在后台轮询 dreamina login checklogin，直到本地登录状态刷新成功。`
   - Step 4: `被阻塞的 Run Node / Run Chain 会在登录成功后自动恢复一次。`
-  - Footer: `兼容兜底：如果 CLI 仍输出旧 QR 标记，界面会把它作为 fallback 信息显示。`
+  - Footer: `兼容兜底：如果 CLI 输出暂时无法解析，界面会保留原始提示供用户继续操作。`
 - Output filename: `page-03-login-flow.png`
 
 ## Page 04

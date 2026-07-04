@@ -2,11 +2,15 @@
 
 > 把 Dreamina CLI 变成可视化 workflow studio 的开源示例仓库
 
+![Workflow Studio OSS 实机界面截图，展示工作流工具栏、可视化画布、Dreamina 生成节点和结果预览](../../screenshots/workflow-studio-current-canvas.png)
+
+实机界面以顶部工作流工具栏、React Flow 画布、Dreamina 生成节点和结果预览为主。开源用户克隆后执行 `npm run dev`，就能在本地浏览器里编辑 prompt、连接 Dreamina 节点、导入导出 workflow，并运行单节点或整条链路。
+
 ![Workflow Studio OSS 首屏插画，展示可视化工作流画布、Dreamina CLI 终端桥接和四层仓库结构](images/hero.png)
 
 Workflow Studio OSS 把 Dreamina CLI 包装成一个可以在浏览器里编辑、导入、导出和运行的本地 workflow studio。仓库把 schema、执行语义、CLI 适配、最小 HTTP API 和 React Flow 画布拆成独立层，适合用来验证一套完整的本地工作流链路。
 
-这版 README 按首访者和贡献者双重视角组织内容：先说明项目是什么、能解决什么，再把四层结构、运行链路、快速启动和验证入口摆清楚。所有图片均通过 Codex CLI 内置的 `gpt-image-2` 生成，视觉方向参考 `style-ref/style-reference.jpg` 的蓝白拼贴版式，但内容只使用仓库中的真实事实。
+这版 README 按首访者和贡献者双重视角组织内容：先用实机截图展示界面，再说明项目是什么、能解决什么，并把四层结构、运行链路、快速启动和验证入口摆清楚。后续插画只作为架构和流程说明的辅助视觉，内容均来自仓库中的真实事实。
 
 ## 核心亮点
 
@@ -79,6 +83,8 @@ npm run dev
 
 仓库已经提供了可直接导入的示例 workflow，路径位于 `resources/workflows/`。如果你想先验证导入导出、分支运行和多素材链路，可以直接从这些文件开始。
 
+部分示例为了覆盖高阶链路，会使用 VIP 或高级模型参数，例如 `image_upscale` 的 `4k`、`seedance2.0_vip` 视频模型。没有对应权限时，可以把示例中的分辨率降到 `2k` / `720p`，或改用非 VIP 模型后再运行。
+
 完成依赖安装后，建议至少跑一次类型检查、测试、构建和 schema 校验，确保当前改动没有破坏既有链路。
 
 - `resources/workflows/fanout-image-derivatives.workflow.json`
@@ -113,4 +119,4 @@ npm run audit:cli-help
 - 当前仓库定位为本地开源源码仓库，不包含远程部署、账号托管或云端服务。
 - Dreamina CLI 参数对齐细节见 `docs/dreamina-cli-alignment.md`。
 - 更多实现细节可继续参考 `docs/technical-overview.md` 与 `docs/workflow-json-format.md`。
-- 如果后续确认这版 README 方向合适，再决定是否覆盖仓库根目录 `README.md`。
+- 这份文件是根目录 README 的生成素材快照，根目录 `README.md` 是开源入口的当前版本。

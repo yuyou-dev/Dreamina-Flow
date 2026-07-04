@@ -21,7 +21,7 @@ parameters.
 | `image2video` | Uses current Seedance names: `seedance1.0fast`, `seedance1.0`, `seedance1.5pro`, Seedance 2.0 family, and `seedance2.0mini`; ratio is inferred from the input image. |
 | `frames2video` | Supports `seedance1.5pro`, Seedance 2.0 family, and `seedance2.0mini`; default model is `seedance2.0_vip`; ratio is inferred from the first frame. |
 | `multiframe2video` | Accepts 2-20 images; 2 images use `prompt`/`duration`; 3+ images use repeated transition prompts and durations; no model or resolution override. |
-| `multimodal2video` | All-around reference mode, formerly `ref2video`; accepts image/video/audio references; supports Seedance 2.0 family plus `seedance2.0mini`; `seedance2.0_vip` supports `4k`. |
+| `multimodal2video` | All-around reference mode, formerly `ref2video`; accepts image/video references with optional audio references; audio-only input is not accepted; supports Seedance 2.0 family plus `seedance2.0mini`; `seedance2.0_vip` supports `4k`. |
 
 ## Non-Generation Surface
 
